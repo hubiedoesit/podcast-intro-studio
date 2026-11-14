@@ -1,0 +1,1460 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Edit review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400..700;1,400&display=swap" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23192733'/%3E%3Cpath d='M11 8l14 8-14 8z' fill='%23FF8933'/%3E%3C/svg%3E" />
+<style>
+  :root {
+    /* the app's own palette: ink, orange, cream */
+    --bg: #0e151b; --panel: #151f28; --panel-2: #1d2a35; --panel-3: #263542; --line: #2d3c49; --line-2: #435666;
+    --text: #f6f1ea; --muted: #b1bcc6; --faint: #93a1ae; --ink: #192733; --orange: #ff8933; --orange-2: #ffa25f; --cream: #fcead7;
+    --green: #4fd38d; --yellow: #f4c544; --red: #ff8a8d; --blue: #7fb2ff;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace; --display: "League Gothic", "Oswald", "Arial Narrow", Impact, sans-serif;
+    --host: #5e8199; --speaker: #4fd38d; --hedra: #b892ff; --card3d: #45d0c6; --screen: #7fb2ff; --graphic: #ff8933; --broll: #d9c7a8;
+    --gutter: 62px;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 "Source Sans 3", "Source Sans Pro", system-ui, -apple-system, sans-serif; font-variant-numeric: tabular-nums; }
+  button, select, input, textarea { font: inherit; color: inherit; }
+  button, .btn { background: var(--panel-2); border: 0; border-radius: 8px; padding: 6px 12px; min-height: 32px; cursor: pointer; color: inherit; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; transition: background .12s, color .12s; }
+  button:hover:not(:disabled), .btn:hover { background: var(--panel-3); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  :focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+  .i { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+  .i.fill { fill: currentColor; }
+  button.primary { background: var(--orange); color: var(--ink); font-weight: 650; }
+  button.primary:hover:not(:disabled) { background: var(--orange-2); }
+  button.danger { color: var(--red); }
+  button.ghost { background: transparent; color: var(--muted); }
+  button.ghost:hover:not(:disabled) { color: var(--text); background: var(--panel-2); }
+  button.pill { border-radius: 999px; padding: 4px 11px; min-height: 28px; background: transparent; color: var(--muted); }
+  button.pill:hover:not(:disabled) { color: var(--text); }
+  button.pill[aria-pressed="true"] { background: var(--panel-3); color: var(--text); font-weight: 600; }
+  button.icon { padding: 0; width: 32px; }
+  button.toggle { background: transparent; color: var(--muted); }
+  button[aria-pressed="true"].toggle { color: var(--orange-2); background: rgba(255,137,51,.14); }
+  button.mini { min-height: 26px; padding: 2px 8px; font-size: 12px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .skip { position: absolute; left: 12px; top: -60px; z-index: 50; background: var(--orange); color: var(--ink); padding: 8px 14px; border-radius: 8px; font-weight: 650; }
+  .skip:focus { top: 8px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; background: var(--line-2); }
+  .dot.yellow { background: var(--yellow); } .dot.green { background: var(--green); } .dot.blue { background: var(--blue); animation: pulse 1.2s infinite; }
+  @keyframes pulse { 50% { opacity: .35; } }
+
+  .app { display: grid; grid-template: "head head" 54px "main panel" minmax(0, 1fr) / minmax(0, 1fr) 340px; height: 100%; }
+  header { grid-area: head; display: flex; align-items: center; gap: 16px; padding: 0 12px 0 18px; border-bottom: 1px solid var(--line); min-width: 0; }
+  .brand { display: flex; align-items: baseline; gap: 6px; margin: 0; font: 700 26px/1 var(--display); text-transform: uppercase; letter-spacing: 0; color: var(--text); white-space: nowrap; }
+  .brand em { font-style: normal; color: var(--orange); }
+  .crumbs { display: flex; align-items: center; gap: 4px; min-width: 0; flex: 1; }
+  .crumb { background: transparent; max-width: 340px; min-width: 0; padding: 6px 8px 6px 10px; font-weight: 600; }
+  .crumb .label { overflow: hidden; text-overflow: ellipsis; }
+  .crumb .i { color: var(--muted); }
+  .crumb[aria-expanded="true"] { background: var(--panel-3); }
+  .sep { width: 1px; height: 18px; background: var(--line); margin: 0 6px; flex: none; }
+  .ver { display: inline-flex; align-items: center; }
+  .ver .crumb { padding: 6px 6px 6px 8px; font-variant-numeric: tabular-nums; }
+  .ver .icon { background: transparent; width: 28px; color: var(--muted); }
+  .actions { display: flex; align-items: center; gap: 6px; flex: none; }
+  .conn { font-size: 12px; color: var(--yellow); white-space: nowrap; }
+  .status { background: transparent; color: var(--muted); font-size: 12.5px; padding: 6px 8px; }
+  .status.bad { color: var(--yellow); }
+  .pop { position: fixed; z-index: 30; width: max-content; min-width: 240px; max-width: min(380px, calc(100vw - 24px)); max-height: min(70vh, 480px); overflow: auto; padding: 6px; background: var(--panel-3); border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,.5); transform-origin: top left; animation: pop .13s cubic-bezier(.2,.8,.2,1); }
+  @keyframes pop { from { opacity: 0; transform: translateY(-4px) scale(.98); } }
+  .pop .filters { display: flex; gap: 2px; padding: 2px 2px 8px; flex-wrap: wrap; }
+  .pop .filters button.pill[aria-pressed="true"] { background: var(--cream); color: var(--ink); }
+  .pop .count { opacity: .75; }
+  .pop-head { padding: 8px 10px 2px; font-size: 11px; color: var(--faint); text-transform: uppercase; letter-spacing: .04em; }
+  .pop-item { width: 100%; justify-content: flex-start; text-align: left; background: transparent; padding: 7px 10px; min-height: 34px; gap: 10px; white-space: normal; }
+  .pop-item:hover:not(:disabled) { background: var(--line-2); }
+  .pop-item[aria-current="true"] { background: var(--line); font-weight: 600; }
+  .pop-item .grow { flex: 1; min-width: 0; }
+  .pop-item .meta { display: block; font-size: 11.5px; color: var(--muted); font-weight: 400; }
+  .pop-item .right { color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+  .pop hr { border: 0; height: 1px; background: var(--line-2); margin: 5px 4px; }
+  main { grid-area: main; overflow: auto; padding: 12px 18px 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  #player-area { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
+  .bar { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  .bar .spacer { flex: 1; }
+  .ver-new { color: var(--orange-2); font-size: 11px; font-weight: 700; }
+  .qa { font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+  .qa.bad { color: var(--yellow); }
+  a.quiet { color: var(--muted); font-size: 12px; text-underline-offset: 2px; }
+  a.quiet:hover { color: var(--text); }
+  .draft-tag { font-size: 11px; color: var(--yellow); border: 1px solid var(--yellow); border-radius: 4px; padding: 0 5px; }
+  .banner { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-left: 3px solid var(--blue); background: var(--panel); border-radius: 8px; }
+  .banner.warn { border-left-color: var(--yellow); } .banner.good { border-left-color: var(--green); } .banner.bad { border-left-color: var(--red); }
+  .banner .msg { flex: 1; min-width: 0; }
+  /* apply-notes tracker: five steps that light up in turn, the current one glowing */
+  .tracker { display: block; padding: 12px 14px 10px; border-left: 0; }
+  .tracker .top { display: flex; align-items: baseline; gap: 10px; }
+  .tracker h3 { margin: 0; font: 700 26px/1 var(--display); letter-spacing: .01em; text-transform: uppercase; }
+  .tracker .clock { margin-left: auto; font: 12px var(--mono); color: var(--muted); }
+  .tracker .steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin: 10px 0 6px; }
+  .tracker .seg { height: 10px; border-radius: 5px; background: var(--panel-3); position: relative; overflow: hidden; }
+  .tracker .seg.done { background: var(--orange); }
+  .tracker .seg.now { background: color-mix(in srgb, var(--orange) 35%, var(--panel-3)); box-shadow: 0 0 12px color-mix(in srgb, var(--orange) 55%, transparent); }
+  .tracker .seg.now::after { content: ""; position: absolute; inset: 0; width: 45%; border-radius: 5px; background: linear-gradient(90deg, transparent, var(--orange), transparent); animation: segrun 1.4s ease-in-out infinite; }
+  .tracker .seg.fail { background: var(--red); }
+  .tracker.good .seg { background: var(--green); }
+  @keyframes segrun { from { transform: translateX(-100%); } to { transform: translateX(230%); } }
+  @media (prefers-reduced-motion: reduce) { .tracker .seg.now::after { animation: none; width: 100%; opacity: .5; transform: none; } }
+  .tracker .labels { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; font-size: 11px; color: var(--faint); text-transform: uppercase; letter-spacing: .04em; }
+  .tracker .labels .on { color: var(--text); font-weight: 600; }
+  .tracker .said { margin-top: 8px; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .banner code { font-family: var(--mono); background: var(--panel-3); padding: 1px 5px; border-radius: 4px; }
+  details.logbox summary { cursor: pointer; color: var(--muted); font-size: 12px; }
+  .log { margin-top: 6px; background: var(--panel); border-radius: 8px; padding: 10px 12px; font-family: var(--mono); font-size: 12px; max-height: 190px; overflow: auto; white-space: pre-wrap; color: var(--muted); }
+
+  .stage { position: relative; flex: none; background: #000; border-radius: 10px; overflow: hidden; margin: 0 auto; width: 100%; max-width: calc((100vh - 348px - var(--extra, 0px)) * 16 / 9); min-width: min(100%, 420px); aspect-ratio: 16 / 9; }
+  .stage video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; background: #000; }
+  /* drawing on the frame: strokes live in a 16:9 box over the picture */
+  .ink { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; touch-action: none; z-index: 2; filter: drop-shadow(0 1px 2px rgba(0,0,0,.65)); }
+  .stage.drawing .ink { pointer-events: auto; cursor: crosshair; }
+  .stage.drawing { outline: 2px solid var(--orange); outline-offset: -2px; }
+  /* the tools sit under the picture, never over the top of it where the titles are */
+  .stage.drawing ~ .spoken { display: none; }
+  .inkbar { position: relative; width: fit-content; margin: 8px auto 0; z-index: 3; display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 10px; background: rgba(14,21,27,.9); backdrop-filter: blur(10px); box-shadow: 0 6px 24px rgba(0,0,0,.4); }
+  .inkbar button { min-height: 32px; min-width: 32px; padding: 0 8px; background: transparent; }
+  .inkbar button[aria-pressed="true"] { background: var(--panel-3); }
+  .inkbar .sw { width: 16px; height: 16px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 1px rgba(255,255,255,.25); }
+  .inkbar button[aria-pressed="true"] .sw { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--c); }
+  .inkbar .sep { width: 1px; height: 20px; background: var(--line-2); margin: 0 4px; }
+  .inkbar .done { background: var(--orange); color: var(--ink); font-weight: 600; margin-left: 4px; }
+  .inkbar .done:hover:not(:disabled) { background: var(--orange-2); }
+  .ink-tag { display: inline-flex; vertical-align: -2px; margin-right: 4px; color: var(--orange); }
+  .ink-tag .i { width: 13px; height: 13px; }
+  .guides { position: absolute; inset: 0; pointer-events: none; }
+  .guides i { position: absolute; border: 1px dashed rgba(255,255,255,.55); }
+  .guides .action { inset: 3.5%; } .guides .title { inset: 7%; border-color: rgba(255,137,51,.8); }
+  .guides .mid { left: 50%; top: 0; bottom: 0; border-width: 0 0 0 1px; }
+  .spoken { min-height: 21px; text-align: center; color: var(--muted); font-size: 13px; }
+  .spoken span { transition: color .08s; }
+  .spoken span.on { color: var(--text); }
+  .pulse { position: absolute; inset: 0; margin: auto; width: 64px; height: 64px; border-radius: 50%; background: rgba(14,21,27,.72); color: #fff; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+  .pulse .i { width: 24px; height: 24px; }
+  .approved { color: var(--green); }
+  .list-head label { min-height: 26px; }
+  .bigplay { position: absolute; inset: 0; margin: auto; width: 64px; height: 64px; padding: 0; border-radius: 50%; background: rgba(14,21,27,.72); color: #fff; }
+  .bigplay:hover:not(:disabled) { background: rgba(14,21,27,.9); }
+  .bigplay .i { width: 24px; height: 24px; margin-left: 3px; }
+  .flip { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; transition: opacity .14s; }
+  .transport { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .readout { font-family: var(--mono); font-size: 14px; margin: 0 6px; white-space: nowrap; }
+  .readout small { color: var(--faint); font-size: 11px; }
+  button.playbtn { background: var(--cream); color: var(--ink); width: 40px; padding: 0; }
+  button.playbtn:hover:not(:disabled) { background: #fff; }
+  .playbtn .i.play { margin-left: 2px; }
+  .transport .drawbtn { margin-left: 6px; border: 1px solid var(--line-2); background: transparent; }
+  .transport .drawbtn[aria-pressed="true"] { background: var(--orange); border-color: var(--orange); color: var(--ink); font-weight: 600; }
+  .transport select { width: 56px; background: transparent; color: var(--muted); border: 0; border-radius: 8px; padding: 5px 2px; min-height: 32px; cursor: pointer; }
+  .transport select:hover { color: var(--text); background: var(--panel-2); }
+  .transport .spacer { flex: 1; }
+
+  /* timeline */
+  .tl { position: relative; display: grid; grid-template-columns: var(--gutter) minmax(0, 1fr); background: var(--panel); border-radius: 10px; padding: 0 10px 8px 0; user-select: none; }
+  .tl-labels { color: var(--muted); font-size: 11px; line-height: 1; text-align: right; padding-right: 8px; }
+  .tl-labels > div { display: flex; align-items: center; justify-content: flex-end; margin-top: 3px; }
+  .tl-labels .h-lane { margin-top: 0; justify-content: center; gap: 0; padding-left: 4px; }
+  .tl-labels .h-lane button { width: 24px; min-height: 24px; color: var(--muted); }
+  .h-lane { height: 26px; } .h-ruler { height: 16px; } .h-picture { height: 56px; } .h-titles { height: 20px; } .h-camera { height: 14px; } .h-voice { height: 36px; }
+  .tl-scroll { position: relative; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; min-width: 0; }
+  .tl-scroll::-webkit-scrollbar { display: none; }
+  .tl-inner { position: relative; min-width: 100%; }
+  .lane-notes { position: relative; height: 26px; }
+  /* a 24 px target around a smaller visible flag */
+  .marker { position: absolute; top: 1px; height: 24px; width: 24px; min-height: 24px; padding: 0; border-radius: 4px; background: transparent; transform: translateX(-12px); }
+  .marker:hover:not(:disabled) { background: transparent; }
+  .marker::before { content: ""; position: absolute; left: 6px; right: 6px; top: 6px; bottom: 6px; border-radius: 3px; background: var(--yellow); transition: transform .12s; }
+  .marker.range { transform: none; opacity: .85; min-width: 12px; } .marker.range::before { left: 0; right: 0; }
+  .marker.done::before { background: var(--green); opacity: .7; }
+  .marker.old::before { opacity: .45; }
+  .marker:hover::before, .marker.now::before { background: var(--orange); }
+  .marker.finding { color: var(--orange-2); }
+  .marker.finding .i { width: 14px; height: 14px; }
+  .marker.finding::before { display: none; }
+  .marker.finding:hover:not(:disabled) { background: var(--panel-3); }
+  .marker.pop-in::before { animation: flagin .28s cubic-bezier(.2,1.5,.4,1); }
+  @keyframes flagin { from { transform: scale(0); } }
+  .stem { position: absolute; top: 20px; height: 62px; width: 1px; background: var(--yellow); opacity: .45; }
+  .stem.done { background: var(--green); opacity: .3; }
+  .tracks { position: relative; cursor: pointer; touch-action: pan-x; border-radius: 4px; }
+  .track { position: relative; display: block; margin-top: 3px; }
+  .track-body { position: relative; overflow: hidden; border-radius: 4px; background: var(--panel-2); height: 100%; }
+  .t-ruler .track-body { background: transparent; color: var(--faint); font: 10px var(--mono); overflow: visible; }
+  .tick { position: absolute; top: 0; padding-left: 3px; border-left: 1px solid var(--line-2); height: 14px; }
+  .t-picture canvas, .t-voice canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .shot { position: absolute; top: 0; bottom: 0; box-shadow: -1px 0 0 rgba(14,21,27,.95); overflow: hidden; }
+  .shot::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--c, var(--host)); }
+  .shot.host::before { opacity: .55; }
+  .shot span { position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 5px 2px; font-size: 10.5px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.75)); }
+  .chip { position: absolute; top: 2px; bottom: 2px; padding: 0 5px; border-radius: 3px; background: var(--panel-3); color: var(--text); font-size: 10.5px; line-height: 16px; font-weight: 550; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chip.center { background: var(--orange); color: var(--ink); }
+  .chip.guest { background: transparent; box-shadow: inset 0 0 0 1px var(--line-2); color: var(--muted); }
+  .push { position: absolute; top: 3px; bottom: 3px; background: linear-gradient(90deg, rgba(127,178,255,.12), rgba(127,178,255,.7)); border-radius: 2px; }
+  .punch-in { position: absolute; top: 2px; bottom: 2px; width: 2px; background: var(--blue); border-radius: 1px; }
+  .breath { position: absolute; top: 0; bottom: 0; background: rgba(184,146,255,.28); }
+  .jump { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px dashed var(--red); }
+  .inout { position: absolute; top: 0; bottom: 0; background: rgba(255,137,51,.2); box-shadow: inset 2px 0 0 var(--orange), inset -2px 0 0 var(--orange); pointer-events: none; }
+  .head { position: absolute; top: 18px; bottom: 0; width: 2px; margin-left: -1px; background: var(--text); box-shadow: 0 0 0 1px rgba(14,21,27,.6); pointer-events: none; will-change: left; }
+  .head::before { content: ""; position: absolute; top: -1px; left: -4px; border: 5px solid transparent; border-top-color: var(--text); }
+  .playzone { position: absolute; inset: 0; pointer-events: none; }
+  .hover-card { position: absolute; z-index: 5; bottom: calc(100% + 6px); width: 192px; transform: translateX(-50%); background: var(--panel-3); border-radius: 8px; overflow: hidden; pointer-events: none; font-size: 11.5px; box-shadow: 0 10px 26px rgba(0,0,0,.5); }
+  .hover-card .frame { width: 100%; aspect-ratio: 16 / 9; background: #000 no-repeat; }
+  .hover-card .cap { padding: 5px 8px; display: flex; justify-content: space-between; gap: 8px; }
+  .hover-card .cap span:first-child { font-family: var(--mono); }
+  .hover-card .cap span:last-child { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sk { background: var(--panel-2); border-radius: 4px; position: relative; overflow: hidden; }
+  .sk::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.05), transparent); animation: shimmer 1.3s infinite; }
+  @keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+  .sk-line { height: 11px; margin: 9px 0; }
+
+  /* compare */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .compare .side { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .compare select, .cmp-select { background: var(--panel-2); border: 0; border-radius: 8px; padding: 5px 6px; min-height: 32px; }
+  .compare .stage { max-width: none; min-width: 0; }
+  .stage.wipe-stage { max-width: calc((100vh - 226px - var(--extra, 0px)) * 16 / 9); }
+  .wipe-stage { touch-action: none; cursor: ew-resize; }
+  .wipe-stage #cmpB { clip-path: inset(0 0 0 var(--split, 50%)); }
+  .wipe-line { position: absolute; top: 0; bottom: 0; left: var(--split, 50%); width: 2px; margin-left: -1px; background: var(--orange); pointer-events: none; }
+  .wipe-tag { position: absolute; top: 8px; padding: 2px 8px; border-radius: 999px; background: rgba(14,21,27,.75); font-size: 12px; pointer-events: none; }
+  .slider-plain { position: relative; height: 30px; background: var(--panel); border-radius: 8px; cursor: pointer; touch-action: none; }
+  .slider-plain .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--panel-3); border-radius: 7px 0 0 7px; pointer-events: none; }
+
+  /* right panel */
+  aside.panel { grid-area: panel; border-left: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+  .tabs { position: relative; display: flex; border-bottom: 1px solid var(--line); padding: 0 6px; flex: none; }
+  .tabs button { flex: 1; background: transparent; border-radius: 0; padding: 11px 4px 10px; min-height: 42px; color: var(--muted); font-weight: 550; }
+  .tabs button:hover:not(:disabled) { background: transparent; color: var(--text); }
+  .tabs button[aria-selected="true"] { color: var(--text); }
+  .tab-ink { position: absolute; bottom: -1px; left: 0; height: 2px; background: var(--orange); transition: transform .18s cubic-bezier(.2,.8,.2,1), width .18s cubic-bezier(.2,.8,.2,1); }
+  .tabs .n { font-size: 11px; line-height: 16px; background: var(--panel-3); color: var(--text); border-radius: 999px; padding: 0 6px; font-variant-numeric: tabular-nums; }
+  .tabpanel { flex: 1; min-height: 0; display: flex; flex-direction: column; animation: fadein .14s; }
+  @keyframes fadein { from { opacity: 0; } }
+  .composer { padding: 12px; flex: none; }
+  .field-wrap { position: relative; }
+  .field-hint { position: absolute; right: 10px; top: 8px; pointer-events: none; }
+  .composer.open .field-hint { display: none; }
+  textarea { display: block; width: 100%; min-height: 36px; resize: none; background: var(--panel-2); border: 0; border-radius: 8px; padding: 8px 10px; transition: min-height .16s cubic-bezier(.2,.8,.2,1); }
+  .composer.open textarea { min-height: 76px; resize: vertical; }
+  .edit-box { min-height: 60px; resize: vertical; }
+  textarea:focus { outline: 2px solid var(--orange); outline-offset: 0; }
+  textarea::placeholder { color: var(--muted); }
+  .more { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .16s cubic-bezier(.2,.8,.2,1); }
+  .composer.open .more { grid-template-rows: 1fr; }
+  .more-inner { overflow: hidden; display: flex; flex-direction: column; gap: 8px; min-height: 0; visibility: hidden; transition: visibility .16s; }
+  .composer.open .more-inner { visibility: visible; padding-top: 8px; }
+  .when { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .when b { font-family: var(--mono); font-weight: 600; color: var(--orange-2); }
+  .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tags button { font-size: 11.5px; padding: 2px 8px; min-height: 24px; border-radius: 999px; background: var(--panel-2); color: var(--muted); }
+  .tags button[aria-pressed="true"] { color: var(--ink); background: var(--cream); }
+  .row { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+  .row label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .row .save { margin-left: auto; }
+  input[type="checkbox"] { accent-color: var(--orange); width: 16px; height: 16px; margin: 0; }
+  .list-head { padding: 4px 6px 4px 14px; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; flex: none; border-top: 1px solid var(--line); }
+  .list-head .spacer { flex: 1; }
+  .list { overflow: auto; flex: 1; padding: 4px 6px 8px; display: flex; flex-direction: column; gap: 1px; margin: 0; list-style: none; }
+  .note { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 8px; padding: 8px; border-radius: 8px; transition: background .12s; }
+  .note:hover { background: var(--panel); }
+  .note.now { background: var(--panel-2); }
+  .note.active { background: var(--panel-2); }
+  .note.done .text { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line-2); }
+  .note .text { padding-top: 2px; }
+  .note .star { color: var(--orange-2); display: inline-flex; vertical-align: -2px; margin-right: 4px; }
+  .note .star .i { width: 13px; height: 13px; }
+  .nmeta { grid-column: 2; display: flex; flex-direction: column; gap: 5px; margin-top: 6px; }
+  .card { padding: 9px 10px; border-radius: 8px; display: flex; flex-direction: column; gap: 5px; }
+  .card:hover { background: var(--panel); }
+  .card.lead { background: var(--panel); }
+  .top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .ts { font: 12px var(--mono); background: var(--panel-2); border-radius: 999px; padding: 1px 8px; min-height: 24px; align-self: start; color: var(--text); }
+  .note.now .ts, .note.active .ts { background: var(--panel-3); }
+  .small { font-size: 11.5px; color: var(--muted); }
+  .tag { font-size: 11.5px; color: var(--orange-2); }
+  .acts { display: flex; gap: 1px; }
+  .note .acts { position: absolute; top: 5px; right: 5px; background: var(--panel-3); border-radius: 7px; opacity: 0; transition: opacity .1s; box-shadow: 0 2px 8px rgba(0,0,0,.3); }
+  .note:hover .acts, .note:focus-within .acts { opacity: 1; }
+  @media (hover: none) { .note .acts { position: static; grid-column: 2; opacity: 1; background: transparent; box-shadow: none; margin-top: 4px; } }
+  .acts button { padding: 0; min-height: 26px; width: 26px; border-radius: 6px; background: transparent; color: var(--muted); }
+  .acts button:hover:not(:disabled) { color: var(--text); background: var(--line-2); }
+  .acts .i { width: 14px; height: 14px; }
+  .acts .textbtn { width: auto; padding: 0 8px; font-size: 12px; background: var(--panel-2); color: var(--text); }
+  .text { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .rule { font-size: 12px; color: var(--muted); border-left: 2px solid var(--orange); padding-left: 8px; }
+  .rulebtn { align-self: flex-start; font-size: 11.5px; color: var(--muted); padding: 1px 6px; min-height: 24px; background: transparent; margin-left: -6px; }
+  .rulebtn .i { width: 13px; height: 13px; }
+  .rulebtn[aria-pressed="true"] { color: var(--orange-2); }
+  .empty { color: var(--muted); text-align: center; padding: 24px 14px; }
+  .empty.big { margin: auto; max-width: 440px; }
+  .empty.big h2 { font: 700 40px/1 var(--display); text-transform: uppercase; color: var(--text); margin: 0 0 8px; }
+  code { font-family: var(--mono); font-size: 12px; }
+  .finding .lvl { font-size: 11.5px; font-weight: 650; }
+  .finding.error .lvl { color: var(--red); } .finding.warn .lvl { color: var(--yellow); } .finding.info .lvl { color: var(--blue); }
+  .finding .acts { margin-left: auto; }
+  .section { padding: 12px 10px 4px; color: var(--muted); font-size: 12px; font-weight: 600; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 0; font-size: 12px; }
+  .kv dt { color: var(--muted); } .kv dd { margin: 0; font-family: var(--mono); }
+  .script { overflow: auto; flex: 1; padding: 12px 14px; font-size: 14.5px; line-height: 1.7; }
+  .script button { all: unset; cursor: pointer; border-radius: 3px; padding: 0 1.5px; }
+  .script button:hover { background: var(--panel-3); }
+  .script button:focus-visible { outline: 2px solid var(--orange); }
+  .script button.now { background: var(--orange); color: var(--ink); }
+  .script button.past { color: var(--muted); }
+  .script .gap { display: block; height: 8px; }
+  kbd { font-family: var(--mono); font-size: 10.5px; border: 1px solid var(--line-2); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; color: var(--text); background: var(--panel-2); }
+  dialog { background: var(--panel-2); color: var(--text); border: 0; border-radius: 12px; padding: 18px 20px; max-width: min(640px, calc(100vw - 32px)); max-height: calc(100vh - 48px); overflow: auto; }
+  dialog::backdrop { background: rgba(5,9,12,.7); }
+  dialog h2 { margin: 0 0 12px; font: 700 30px/1 var(--display); text-transform: uppercase; }
+  dialog .acts { margin-top: 14px; justify-content: flex-end; gap: 8px; }
+  dialog .acts button { padding: 6px 12px; font-size: 13px; }
+  .keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 4px 24px; margin: 0; }
+  .keys div { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border-bottom: 1px solid var(--line); }
+  .keys dt { color: var(--muted); } .keys dd { margin: 0; white-space: nowrap; }
+  .tip { position: fixed; z-index: 60; max-width: 260px; padding: 7px 10px; border-radius: 8px; background: var(--panel-3); color: var(--text); box-shadow: 0 8px 24px rgba(0,0,0,.45); font-size: 13px; line-height: 1.35; pointer-events: none; opacity: 0; transform: translateY(3px); transition: opacity .12s, transform .12s; }
+  .tip.on { opacity: 1; transform: none; }
+  .tip b { font-weight: 600; } .tip kbd { margin-left: 6px; }
+  .tip p { margin: 3px 0 0; color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { .tip { transition: none; } }
+  .toast { position: fixed; bottom: 14px; right: 14px; display: flex; align-items: center; gap: 12px; background: var(--panel-3); padding: 8px 8px 8px 14px; min-height: 40px; border-radius: 8px; opacity: 0; transform: translateY(6px); transition: opacity .16s, transform .16s cubic-bezier(.2,.8,.2,1); pointer-events: none; z-index: 40; max-width: calc(100vw - 32px); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+  .toast.show { opacity: 1; transform: none; pointer-events: auto; }
+  .toast button { padding: 2px 10px; min-height: 26px; background: var(--line-2); margin-right: 2px; }
+  #toastMsg { padding-right: 6px; }
+  @media (max-width: 1100px) {
+    .brand { display: none; }
+    .status .label { display: none; }
+    .app { grid-template-columns: minmax(0, 1fr) 300px; }
+  }
+  /* phones get their own layout: the picture stays pinned while the notes scroll under it */
+  @media (max-width: 760px) {
+    html, body { height: auto; }
+    .app { display: flex; flex-direction: column; height: auto; min-height: 100%; }
+    header { height: auto; min-height: 52px; padding: 6px 8px; flex-wrap: wrap; gap: 4px; }
+    .crumbs { flex: 1 1 100%; }
+    .crumb { flex: 0 1 auto; }
+    .actions { flex: 1; justify-content: flex-end; }
+    #compareBtn { display: none; }
+    main { overflow: visible; padding: 0 0 8px; gap: 8px; }
+    #banners { padding: 8px 8px 0; }
+    #player-area { gap: 6px; }
+    .stage { position: sticky; top: 0; z-index: 8; max-width: none; min-width: 0; border-radius: 0; }
+    .spoken, .transport, .tl { margin-inline: 8px; }
+    .spoken { font-size: 12.5px; }
+    .opt-wide { display: none !important; }
+    .h-titles, .h-camera, .t-titles, .t-camera { display: none; }
+    .tl { grid-template-columns: minmax(0, 1fr); padding: 0 10px 8px; }
+    .tl-labels { display: none; }
+    .readout small { display: none; }
+    .field-hint { display: none; }
+    aside.panel { border-top: 1px solid var(--line); min-height: 420px; }
+    .list, .script { overflow: visible; }
+    .compare { grid-template-columns: 1fr; }
+    .bigplay { width: 56px; height: 56px; }
+    .acts button { min-height: 32px; width: 32px; }
+    .toast { left: 8px; right: 8px; bottom: 8px; justify-content: space-between; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  @media (forced-colors: active) { .shot::before, .head, .chip, .marker, .dot { forced-color-adjust: none; } }
+</style>
+</head>
+<body>
+<!-- Icons: Lucide 0.468.0 (ISC) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3" /></symbol><symbol id="i-pause" viewBox="0 0 24 24"><rect x="14" y="4" width="4" height="16" rx="1" /> <rect x="6" y="4" width="4" height="16" rx="1" /></symbol><symbol id="i-repeat" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4" /> <path d="M3 11v-1a4 4 0 0 1 4-4h14" /> <path d="m7 22-4-4 4-4" /> <path d="M21 13v1a4 4 0 0 1-4 4H3" /></symbol><symbol id="i-volume-2" viewBox="0 0 24 24"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" /> <path d="M16 9a5 5 0 0 1 0 6" /> <path d="M19.364 18.364a9 9 0 0 0 0-12.728" /></symbol><symbol id="i-volume-x" viewBox="0 0 24 24"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" /> <line x1="22" x2="16" y1="9" y2="15" /> <line x1="16" x2="22" y1="9" y2="15" /></symbol><symbol id="i-maximize" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3" /> <path d="M21 8V5a2 2 0 0 0-2-2h-3" /> <path d="M3 16v3a2 2 0 0 0 2 2h3" /> <path d="M16 21h3a2 2 0 0 0 2-2v-3" /></symbol><symbol id="i-guides" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2" /><rect width="12" height="8" x="6" y="8" rx="1" stroke-dasharray="2 2" /></symbol><symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2" /> <path d="M17 3h2a2 2 0 0 1 2 2v2" /> <path d="M21 17v2a2 2 0 0 1-2 2h-2" /> <path d="M7 21H5a2 2 0 0 1-2-2v-2" /></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /> <polyline points="7 10 12 15 17 10" /> <line x1="12" x2="12" y1="15" y2="3" /></symbol><symbol id="i-ellipsis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1" /> <circle cx="19" cy="12" r="1" /> <circle cx="5" cy="12" r="1" /></symbol><symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol><symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" /></symbol><symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></symbol><symbol id="i-pencil" viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /> <path d="m15 5 4 4" /></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></symbol><symbol id="i-rotate-ccw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /> <path d="M3 3v5h5" /></symbol><symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol><symbol id="i-star" viewBox="0 0 24 24"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" /></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></symbol><symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /> <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></symbol><symbol id="i-git-compare-arrows" viewBox="0 0 24 24"><circle cx="5" cy="6" r="3" /> <path d="M12 6h5a2 2 0 0 1 2 2v7" /> <path d="m15 9-3-3 3-3" /> <circle cx="19" cy="18" r="3" /> <path d="M12 18H7a2 2 0 0 1-2-2V9" /> <path d="m9 15 3 3-3 3" /></symbol><symbol id="i-keyboard" viewBox="0 0 24 24"><path d="M10 8h.01" /> <path d="M12 12h.01" /> <path d="M14 8h.01" /> <path d="M16 12h.01" /> <path d="M18 8h.01" /> <path d="M6 8h.01" /> <path d="M7 16h10" /> <path d="M8 12h.01" /> <rect width="20" height="16" x="2" y="4" rx="2" /></symbol><symbol id="i-images" viewBox="0 0 24 24"><path d="M18 22H4a2 2 0 0 1-2-2V6" /> <path d="m22 13-1.296-1.296a2.41 2.41 0 0 0-3.408 0L11 18" /> <circle cx="12" cy="8" r="2" /> <rect width="16" height="16" x="6" y="2" rx="2" /></symbol><symbol id="i-zoom-in" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /> <line x1="21" x2="16.65" y1="21" y2="16.65" /> <line x1="11" x2="11" y1="8" y2="14" /> <line x1="8" x2="14" y1="11" y2="11" /></symbol><symbol id="i-zoom-out" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /> <line x1="21" x2="16.65" y1="21" y2="16.65" /> <line x1="8" x2="14" y1="11" y2="11" /></symbol><symbol id="i-arrow-left-right" viewBox="0 0 24 24"><path d="M8 3 4 7l4 4" /> <path d="M4 7h16" /> <path d="m16 21 4-4-4-4" /> <path d="M20 17H4" /></symbol><symbol id="i-arrow-up-right" viewBox="0 0 24 24"><path d="M7 7h10v10" /> <path d="M7 17 17 7" /></symbol><symbol id="i-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /></symbol><symbol id="i-undo-2" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5" /> <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11" /></symbol><symbol id="i-trash-2" viewBox="0 0 24 24"><path d="M3 6h18" /> <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /> <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></symbol><symbol id="i-square" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" /></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="M12 5v14" /></symbol><symbol id="i-circle-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="m9 12 2 2 4-4" /></symbol><symbol id="i-triangle-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" /> <path d="M12 9v4" /> <path d="M12 17h.01" /></symbol></svg>
+<a class="skip" href="#player-area">Skip to player</a>
+<div class="app">
+  <header>
+    <h1 class="brand">Edit <em>review</em></h1>
+    <nav class="crumbs" id="crumbs" aria-label="Project, cut and version"></nav>
+    <span class="conn" id="conn" role="status"></span>
+    <div class="actions" id="toolbar" role="toolbar" aria-label="Review actions"></div>
+  </header>
+  <main id="main" tabindex="-1">
+    <div id="banners"></div>
+    <div id="player-area" tabindex="-1"></div>
+  </main>
+  <aside class="panel" id="panel" aria-label="Review panel">
+    <div class="tabs" role="tablist" aria-label="Review panel" id="tabs"></div>
+    <section class="tabpanel" id="tab-notes" role="tabpanel" aria-labelledby="tabbtn-notes">
+      <form class="composer" id="composer">
+        <div class="field-wrap">
+          <label class="sr" for="noteText">Note text</label>
+          <textarea id="noteText" rows="1" placeholder="Add a note"></textarea>
+          <span class="field-hint" id="fieldHint"><kbd>N</kbd></span>
+        </div>
+        <div class="more"><div class="more-inner">
+          <div class="when"><span>At <b id="whenLabel" aria-live="off">0:00.0</b> <span class="small" id="whenCtx"></span></span><span style="flex:1"></span>
+            <button type="button" class="mini" id="drawNote" title="Draw on the frame (D)">Draw</button><button type="button" class="mini" id="rangeIn" title="Start a range here (I)">Set in</button><button type="button" class="mini" id="rangeOut" title="End the range here (O)">Set out</button><button type="button" class="mini" id="rangeClear" hidden title="Clear the range (X)">Clear</button></div>
+          <div class="tags" id="cats" role="group" aria-label="Note category"></div>
+          <div class="row"><label><input type="checkbox" id="ruleChk" /> Standing rule</label><button type="submit" class="save primary" id="saveBtn" disabled>Save note</button></div>
+        </div></div>
+      </form>
+      <div class="list-head"><label class="row" id="doneRow"><input type="checkbox" id="showDone" /> <span id="noteCount"></span></label><span class="spacer"></span><button class="ghost icon" id="copyNotes" aria-label="Copy the open notes as text" title="Copy the open notes as text"><svg class="i"><use href="#i-copy"/></svg></button></div>
+      <ul class="list" id="noteList" aria-label="Notes"></ul>
+    </section>
+    <section class="tabpanel" id="tab-script" role="tabpanel" aria-labelledby="tabbtn-script" hidden><div class="script" id="script"></div></section>
+    <section class="tabpanel" id="tab-changes" role="tabpanel" aria-labelledby="tabbtn-changes" hidden><div class="list" id="changes"></div></section>
+    <section class="tabpanel" id="tab-checks" role="tabpanel" aria-labelledby="tabbtn-checks" hidden><div class="list" id="checks"></div></section>
+  </aside>
+</div>
+<div class="pop" id="menu" role="dialog" aria-label="Menu" hidden></div>
+<div class="tip" id="tip" role="tooltip" hidden></div>
+<div class="toast" id="toast" role="status" aria-live="polite"><span id="toastMsg"></span><button id="toastAct" hidden></button></div>
+<dialog id="helpDlg" aria-labelledby="helpTitle">
+  <h2 id="helpTitle">Shortcuts</h2>
+  <dl class="keys">
+    <div><dt>Play / pause</dt><dd><kbd>Space</kbd> or <kbd>K</kbd></dd></div>
+    <div><dt>Back / forward 1 frame</dt><dd><kbd>←</kbd> <kbd>→</kbd></dd></div>
+    <div><dt>Back / forward 0.1 s</dt><dd><kbd>,</kbd> <kbd>.</kbd></dd></div>
+    <div><dt>Back / forward 1 s</dt><dd><kbd>⇧</kbd> <kbd>←</kbd> <kbd>→</kbd> or <kbd>J</kbd> <kbd>L</kbd></dd></div>
+    <div><dt>Previous / next cut</dt><dd><kbd>↑</kbd> <kbd>↓</kbd></dd></div>
+    <div><dt>Previous / next note</dt><dd><kbd>[</kbd> <kbd>]</kbd></dd></div>
+    <div><dt>Start / end</dt><dd><kbd>Home</kbd> <kbd>End</kbd></dd></div>
+    <div><dt>Note at this moment</dt><dd><kbd>N</kbd></dd></div>
+    <div><dt>Draw on the frame</dt><dd><kbd>D</kbd>, undo <kbd>⌘</kbd> <kbd>Z</kbd></dd></div>
+    <div><dt>Save note / new line</dt><dd><kbd>Enter</kbd> / <kbd>⇧</kbd> <kbd>Enter</kbd></dd></div>
+    <div><dt>Leave the note box</dt><dd><kbd>Esc</kbd></dd></div>
+    <div><dt>Range in / out / clear</dt><dd><kbd>I</kbd> <kbd>O</kbd> <kbd>X</kbd></dd></div>
+    <div><dt>Mark a range on the timeline</dt><dd><kbd>⇧</kbd> drag</dd></div>
+    <div><dt>Loop the range</dt><dd><kbd>R</kbd></dd></div>
+    <div><dt>Compare versions</dt><dd><kbd>C</kbd></dd></div>
+    <div><dt>Zoom the timeline</dt><dd><kbd>+</kbd> <kbd>−</kbd></dd></div>
+    <div><dt>Safe-area guides</dt><dd><kbd>G</kbd></dd></div>
+    <div><dt>Mute</dt><dd><kbd>M</kbd></dd></div>
+    <div><dt>Fullscreen</dt><dd><kbd>F</kbd></dd></div>
+    <div><dt>This list</dt><dd><kbd>?</kbd></dd></div>
+  </dl>
+  <div class="acts"><button id="helpClose">Close</button></div>
+</dialog>
+<dialog id="confirmDlg" aria-labelledby="confirmTitle">
+  <h2 id="confirmTitle"></h2>
+  <div id="confirmBody"></div>
+  <div class="acts"><button id="confirmNo">Cancel</button><button id="confirmYes" class="primary"></button></div>
+</dialog>
+<script>
+const CATS = ["Hedra Avatar", "Hyperframes Motion", "B-Roll Swap", "Caption/Copy", "Audio/Trim", "New Hook"];
+const TYPES = { host: ["Host", "--host"], hook: ["Hook", "--host"], speaker: ["Guest", "--speaker"], hedra: ["Hedra", "--hedra"], card3d: ["3D card", "--card3d"], screen: ["Screen", "--screen"], graphic: ["Graphic", "--graphic"], broll: ["B-roll", "--broll"] };
+const S = {
+  projects: [], filter: localGet("filter", "to_review"), pid: localGet("pid", null), cut: null, version: null, doc: null, insight: null, tab: localGet("tab", "notes"),
+  zoom: 1, pin: 0, rin: null, rout: null, cat: null, composing: false, showDone: localGet("showDone", false), compare: false, cmpMode: localGet("cmpMode", "wipe"), cmp: { left: null, right: null }, cmpAudio: "left",
+  guides: false, loop: false, rate: localGet("rate", 1), muted: localGet("muted", false), health: {}, log: [], seekTo: null, stageKey: null, editing: null, seen: localGet("seen", {}),
+};
+
+function localGet(k, d) { try { return JSON.parse(localStorage.getItem("review." + k)) ?? d; } catch { return d; } }
+function localSet(k, v) { try { localStorage.setItem("review." + k, JSON.stringify(v)); } catch {} }
+const $ = (id) => document.getElementById(id);
+const icon = (name, cls = "") => `<svg class="i ${cls}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const dotClass = (s) => s.busy ? "blue" : s.approved ? "green" : s.unreviewed || s.open ? "yellow" : "";
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = (t) => { t = Math.max(0, t || 0); const m = Math.floor(t / 60), s = t - m * 60; return `${m}:${s.toFixed(1).padStart(4, "0")}`; };
+const spoken = (t) => { t = Math.max(0, t || 0); const m = Math.floor(t / 60), s = (t - m * 60).toFixed(1); return m ? `${m} minute${m > 1 ? "s" : ""} ${s} seconds` : `${s} seconds`; };
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+const api = async (url, opts = {}) => { const r = await fetch(url, { headers: { "content-type": "application/json" }, ...opts, body: opts.body ? JSON.stringify(opts.body) : undefined }); const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || r.statusText); return j; };
+function toast(msg, action) {
+  const t = $("toast"), b = $("toastAct"); $("toastMsg").textContent = msg; t.classList.add("show"); clearTimeout(t._h);
+  b.hidden = !action; if (action) { b.textContent = action.label; b.onclick = () => { t.classList.remove("show"); action.run(); }; }
+  t._h = setTimeout(() => t.classList.remove("show"), action ? 7000 : 2200);
+}
+const fail = (e) => toast(e.message || String(e));
+// re-rendering a container must not throw keyboard users back to the top of the page
+function keepFocus(el, html) { const k = document.activeElement?.dataset?.k, inside = el.contains(document.activeElement); el.innerHTML = html; if (k && inside) el.querySelector(`[data-k="${CSS.escape(k)}"]`)?.focus(); }
+
+// ---------- queue state ----------
+const latest = (h) => h.versions.at(-1)?.version;
+const hookState = (h) => ({
+  approved: !!h.approved_version && h.approved_version === latest(h),
+  unreviewed: !!latest(h) && h.reviewed_version !== latest(h) && h.approved_version !== latest(h),
+  open: h.notes.filter((n) => n.status === "open").length,
+  busy: !!(h.rendering || h.applying),
+});
+const projState = (d) => {
+  const hs = Object.values(d.hooks).map(hookState);
+  return { approved: hs.length > 0 && hs.every((x) => x.approved), unreviewed: hs.some((x) => x.unreviewed), open: hs.reduce((a, x) => a + x.open, 0), busy: d.applying || hs.some((x) => x.busy) };
+};
+const inFilter = (d, f) => { const s = projState(d); return f === "all" ? true : f === "approved" ? s.approved : f === "notes_open" ? s.open > 0 : !s.approved && (s.unreviewed || s.open > 0 || s.busy); };
+const newest = (d) => Math.max(0, ...Object.values(d.hooks).flatMap((h) => h.versions.map((v) => Date.parse(v.created_at) || 0)));
+const curHook = () => S.doc?.hooks[S.cut];
+const curVer = () => curHook()?.versions.find((v) => v.version === S.version);
+const plan = () => S.insight?.plan;
+
+// ---------- header: project, cut, version ----------
+function renderShell() { renderCrumbs(); if (!$("menu").hidden && S.menuKind === "proj") projMenu(); }
+function renderCrumbs() {
+  const d = S.doc ?? S.projects.find((x) => x.project_id === S.pid), el = $("crumbs");
+  if (!d) { el.innerHTML = S.projects.length ? `<button class="crumb" data-k="projMenu" id="projMenu" aria-haspopup="dialog" aria-expanded="false"><span class="label">Choose a project</span>${icon("chevron-down")}</button>` : ""; return; }
+  const h = curHook(), hooks = Object.entries(d.hooks), i = h ? h.versions.findIndex((v) => v.version === S.version) : -1;
+  const cuts = hooks.length > 1 ? `<span class="sep"></span>` + hooks.map(([k, x]) => { const st = hookState(x); return `<button class="pill" data-k="cut-${esc(k)}" data-cut="${esc(k)}" aria-pressed="${k === S.cut}">${esc(x.label)}${st.open || st.unreviewed ? `<span class="dot yellow"></span><span class="sr"> (needs review)</span>` : ""}</button>`; }).join("") : "";
+  const ver = h?.versions.length ? `<span class="sep"></span><span class="ver">
+      <button class="icon" data-k="verPrev" data-ver-step="-1" ${i > 0 ? "" : "disabled"} aria-label="Previous version" title="Previous version">${icon("chevron-left")}</button>
+      <button class="crumb" data-k="verMenu" id="verMenu" aria-haspopup="dialog" aria-expanded="false" aria-label="Version ${esc(vfull(S.version))}, ${i + 1} of ${h.versions.length}"><span class="label">${esc(vname(S.version))}</span>${icon("chevron-down")}</button>
+      <button class="icon" data-k="verNext" data-ver-step="1" ${i >= 0 && i < h.versions.length - 1 ? "" : "disabled"} aria-label="Next version" title="Next version">${icon("chevron-right")}</button></span>
+      ${i < h.versions.length - 1 && latest(h) !== h.reviewed_version && latest(h) !== h.approved_version ? `<button class="pill" data-k="verLatest" data-ver="${esc(latest(h))}"><span class="ver-new">${esc(latest(h))} is new</span></button>` : ""}` : "";
+  keepFocus(el, `<button class="crumb" data-k="projMenu" id="projMenu" aria-haspopup="dialog" aria-expanded="false" title="${esc(d.title)}"><span class="dot ${dotClass(projState(d))}"></span><span class="label">${esc(d.title)}</span>${icon("chevron-down")}</button>${cuts}${ver}`);
+}
+$("crumbs").addEventListener("click", async (e) => {
+  const t = e.target.closest("button"); if (!t) return;
+  try {
+    if (t.id === "projMenu") { toggleMenu("proj", t, projMenu); return; }
+    if (t.id === "verMenu") { toggleMenu("ver", t, verMenu); return; }
+    if (t.dataset.verStep) { const h = curHook(), i = h.versions.findIndex((v) => v.version === S.version), v = h.versions[i + Number(t.dataset.verStep)]; if (v) selectVersion(v.version); return; }
+    if (t.dataset.ver) { selectVersion(t.dataset.ver); return; }
+    if (t.dataset.cut) { S.cut = t.dataset.cut; S.version = null; S.compare = false; S.insight = null; S.rin = S.rout = null; await openProject(S.pid, true); }
+  } catch (err) { fail(err); }
+});
+
+// ---------- popover menus ----------
+function openMenu(anchor, kind) {
+  const m = $("menu"), r = anchor.getBoundingClientRect();
+  S.menuKind = kind; S.menuAnchor = anchor.dataset.k;
+  m.hidden = false; anchor.setAttribute("aria-expanded", "true");
+  const w = m.offsetWidth, left = kind === "more" ? r.right - w : r.left;
+  m.style.left = `${Math.max(8, Math.min(innerWidth - w - 8, left))}px`; m.style.top = `${r.bottom + 6}px`;
+  m.style.transformOrigin = kind === "more" ? "top right" : "top left";
+  (m.querySelector('[aria-current="true"]') ?? m.querySelector("button, a"))?.focus();
+}
+function closeMenu(refocus = true) {
+  const m = $("menu"); if (m.hidden) return;
+  m.hidden = true;
+  const a = document.querySelector(`[data-k="${S.menuAnchor}"]`); a?.setAttribute("aria-expanded", "false");
+  if (refocus) a?.focus();
+  S.menuKind = null;
+}
+function toggleMenu(kind, anchor, fill) { if (S.menuKind === kind) { closeMenu(); return; } closeMenu(false); fill(); openMenu(anchor, kind); }
+function projMenu() {
+  const F = [["to_review", "To review"], ["notes_open", "Notes open"], ["approved", "Approved"], ["all", "All"]];
+  const shown = S.projects.filter((d) => inFilter(d, S.filter) || d.project_id === S.pid).sort((a, b) => newest(b) - newest(a));
+  $("menu").setAttribute("aria-label", "Projects");
+  $("menu").innerHTML = `<div class="filters" role="group" aria-label="Filter projects">${F.map(([k, l]) => `<button class="pill" data-f="${k}" aria-pressed="${S.filter === k}">${l} <span class="count">${S.projects.filter((d) => inFilter(d, k)).length}</span></button>`).join("")}</div>` +
+    shown.map((d) => {
+      const s = projState(d), hooks = Object.values(d.hooks), v = hooks[0] ? latest(hooks[0]) : null;
+      const status = s.busy ? "working" : s.approved ? "approved" : s.open ? plural(s.open, "open note") : s.unreviewed ? "to review" : "reviewed";
+      return `<button class="pop-item" data-p="${esc(d.project_id)}" aria-current="${d.project_id === S.pid}"><span class="dot ${dotClass(s)}"></span><span class="grow">${esc(d.title)}<span class="meta">${v ?? "no renders"} · ${status}${hooks.length > 1 ? ` · ${hooks.length} cuts` : ""}</span></span></button>`;
+    }).join("");
+}
+// new footage starts a new edit at v1: ids are v3 in the first edit and e2-v1 after that, shown as v3 / v1
+const editOfId = (id) => Number(/^e(\d+)-/.exec(id ?? "")?.[1]) || 1;
+const vname = (id) => String(id ?? "").replace(/^e\d+-/, "");
+// delivery name for downloads: today's date + _INTRO, e.g. 20261110_INTRO.mp4
+const dlName = () => { const d = new Date(), p2 = (n) => String(n).padStart(2, "0"); return `${d.getFullYear()}${p2(d.getMonth() + 1)}${p2(d.getDate())}_INTRO.mp4`; };
+const vfull = (id) => (editOfId(id) > 1 ? `Edit ${editOfId(id)} ${vname(id)}` : vname(id));
+const shortDate = (iso) => { const d = new Date(iso); return isNaN(d) ? "" : d.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + ", " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }); };
+function verMenu() {
+  const h = curHook();
+  $("menu").setAttribute("aria-label", "Versions");
+  const edits = new Set(h.versions.map((v) => editOfId(v.version))).size;
+  $("menu").innerHTML = [...h.versions].reverse().map((v, i, all) => {
+    const e = editOfId(v.version), head = edits > 1 && (i === 0 || editOfId(all[i - 1].version) !== e) ? `<div class="pop-head">Edit ${e}${e > 1 ? " · new footage" : ""}</div>` : "";
+    const n = h.notes.filter((x) => x.version === v.version && x.status === "open").length, flagged = v.qa && !v.qa.pass;
+    return `${head}<button class="pop-item" data-ver="${esc(v.version)}" aria-current="${v.version === S.version}"><span class="grow">${esc(vname(v.version))}${v.version === h.approved_version ? " · approved" : ""}${v.quality === "draft" ? " · draft" : ""}<span class="meta">${esc(shortDate(v.created_at))}</span></span><span class="right">${n ? plural(n, "note") : ""}</span>${flagged ? `<span title="QA flagged" style="color:var(--yellow);display:inline-flex">${icon("triangle-alert")}<span class="sr">QA flagged</span></span>` : ""}</button>`;
+  }).join("");
+}
+function moreMenu() {
+  const v = curVer();
+  $("menu").setAttribute("aria-label", "More");
+  $("menu").innerHTML = `
+    <button class="pop-item" data-act="newHook">${icon("plus")}<span class="grow">New hook…</span></button>
+    <button class="pop-item" data-act="copyLink">${icon("link")}<span class="grow">Copy link to this moment</span></button>
+    <hr/>
+    ${v?.qa?.contact_sheet ? `<a class="btn pop-item" href="/files/${esc(v.qa.contact_sheet)}" target="_blank" rel="noopener">${icon("images")}<span class="grow">Contact sheet</span></a>` : ""}
+    ${v ? `<a class="btn pop-item" href="/files/${esc(v.video_path)}" download="${dlName()}">${icon("download")}<span class="grow">Download ${esc(vname(v.version))}</span></a>` : ""}
+    <hr/>
+    <button class="pop-item" data-act="help">${icon("keyboard")}<span class="grow">Keyboard shortcuts</span><kbd>?</kbd></button>`;
+}
+$("menu").addEventListener("click", async (e) => {
+  const t = e.target.closest("button, a"); if (!t) return;
+  try {
+    if (t.dataset.f) { S.filter = t.dataset.f; localSet("filter", S.filter); projMenu(); $("menu").querySelector(`[data-f="${S.filter}"]`)?.focus(); return; }
+    if (t.dataset.p) { closeMenu(); await openProject(t.dataset.p); return; }
+    if (t.dataset.ver) { closeMenu(); selectVersion(t.dataset.ver); return; }
+    if (t.dataset.act === "help") { closeMenu(false); $("helpDlg").showModal(); return; }
+    if (t.dataset.act === "newHook") { closeMenu(false); S.cat = "New Hook"; showTab("notes"); renderCats(); ta.placeholder = "Describe the alternate opening: a different line, a guest soundbite, a stat…"; ta.focus(); return; }
+    if (t.dataset.act === "copyLink") { closeMenu(); updateHash(); await navigator.clipboard.writeText(location.href); toast("Link copied"); return; }
+    closeMenu(false);
+  } catch (err) { fail(err); }
+});
+$("menu").addEventListener("keydown", (e) => {
+  e.stopPropagation();
+  const items = [...$("menu").querySelectorAll("button, a")], i = items.indexOf(document.activeElement);
+  if (e.key === "Escape") { e.preventDefault(); closeMenu(); }
+  else if (e.key === "Tab") closeMenu(false);
+  else if (e.key === "ArrowDown") { e.preventDefault(); items[(i + 1) % items.length]?.focus(); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); items[(i - 1 + items.length) % items.length]?.focus(); }
+});
+document.addEventListener("pointerdown", (e) => { if (!$("menu").hidden && !e.target.closest("#menu") && !e.target.closest(`[data-k="${S.menuAnchor}"]`)) closeMenu(false); });
+
+// ---------- load ----------
+async function loadProjects() {
+  S.projects = await api("/api/projects");
+  api("/api/health").then((h) => { S.health = h; renderToolbar(); }).catch(() => {});
+  const link = readHash();
+  if (link.p && S.projects.some((d) => d.project_id === link.p)) { S.pid = link.p; S.cut = link.c ?? null; S.version = link.v ?? null; if (link.t != null) S.seekTo = link.t; }
+  if (!S.pid || !S.projects.some((d) => d.project_id === S.pid)) S.pid = [...S.projects].sort((a, b) => newest(b) - newest(a)).find((d) => inFilter(d, S.filter))?.project_id ?? S.projects[0]?.project_id ?? null;
+  renderShell();
+  if (S.pid) await openProject(S.pid, true); else renderEmpty();
+}
+function renderEmpty() {
+  $("toolbar").innerHTML = ""; $("banners").innerHTML = ""; renderCrumbs();
+  $("player-area").innerHTML = `<div class="empty big"><h2>Nothing to review yet</h2><p>Render an episode and it shows up here on its own:</p><p><code>node build.mjs episodes/&lt;slug&gt;.json --render</code></p></div>`;
+}
+async function openProject(pid, keep) {
+  const switching = pid !== S.pid;
+  S.pid = pid; localSet("pid", pid);
+  const doc = await api(`/api/projects/${pid}`);
+  S.doc = doc;
+  S.log = doc.job?.log ?? [];
+  if (switching || !keep || !doc.hooks[S.cut]) { S.cut = Object.keys(doc.hooks)[0] ?? null; S.version = null; S.compare = false; S.rin = S.rout = null; S.loop = false; S.insight = null; S.logOpen = false; }
+  const h = curHook();
+  if (h && (!S.version || !h.versions.some((v) => v.version === S.version))) S.version = h.active_version ?? latest(h);
+  renderShell(); renderAll(); loadInsight(); updateHash();
+}
+function renderAll() { renderToolbar(); renderBanners(); renderStage(); renderPanel(); }
+async function loadInsight() {
+  const key = `${S.pid}|${S.cut}|${S.version}`, h = curHook();
+  if (!S.version || !h?.versions.length) { S.insight = null; return; }
+  try {
+    const ins = await api(`/api/projects/${S.pid}/hooks/${S.cut}/versions/${S.version}/insight`);
+    if (key !== `${S.pid}|${S.cut}|${S.version}`) return;
+    S.insight = ins; renderToolbar(); renderTimeline(); renderPanel();
+  } catch (e) { fail(e); }
+}
+
+// ---------- actions ----------
+// one filled button at a time: applying notes while any are open, approving once none are
+function renderToolbar() {
+  renderCrumbs();
+  const d = S.doc, h = curHook(), v = curVer();
+  document.title = d && h ? `${vname(S.version)} ${d.title}${hookState(h).open ? ` (${hookState(h).open})` : ""} · Edit review`.trim() : "Edit review";
+  if (!d || !h) { $("toolbar").innerHTML = ""; return; }
+  const st = hookState(h), applying = !!(d.job?.running || h.applying), noClaude = S.health.claude === false;
+  const canCompare = h.versions.length > 1 || Object.keys(d.hooks).length > 1;
+  const errs = (S.insight?.findings ?? []).filter((f) => f.level === "error").length, flagged = v?.qa && !v.qa.pass;
+  const statusText = !v ? "" : flagged ? `QA flagged ${v.qa.issues.length}` : errs ? plural(errs, "rule error") : v.qa ? "QA passed" : "";
+  const status = statusText ? `<button class="status ${flagged || errs ? "bad" : ""}" data-k="statusBtn" id="statusBtn" title="${esc(flagged ? v.qa.issues.join("\n") : v.qa ? `${v.qa.loudness?.lufs ?? "?"} LUFS · ${v.duration_sec}s. Open the checks.` : "Open the checks")}">${flagged || errs ? icon("triangle-alert") : `<span class="dot green"></span>`}<span class="label">${esc(statusText)}</span></button>` : "";
+  const isApproved = v && v.version === h.approved_version;
+  const approve = isApproved
+    ? `<button class="approved" data-k="unapprove" id="unapprove" title="Take the approval back; the exported file stays in exports/approved/">${icon("check")} Approved</button>`
+    : `<button class="${st.open || applying ? "" : "primary"}" data-k="approve" id="approve" ${!v ? "disabled" : ""}>Approve</button>`;
+  const apply = applying
+    ? `<button data-k="stop" id="stop" class="danger" title="Stop applying notes">${icon("square")} Stop</button><button class="primary" data-k="apply" id="apply" disabled>Applying…</button>`
+    : st.open ? `<button class="primary" data-k="apply" id="apply" ${noClaude ? "disabled" : ""} title="${noClaude ? "The claude command isn't on PATH" : "Claude edits the config, re-renders and publishes the next version"}">Apply ${plural(st.open, "note")}</button>` : "";
+  keepFocus($("toolbar"), `${v?.quality === "draft" ? `<span class="draft-tag">Draft</span>` : ""}${status}
+    <button class="icon toggle" data-k="compareBtn" id="compareBtn" aria-pressed="${S.compare}" ${canCompare ? "" : "disabled"} aria-label="Compare versions" title="${canCompare ? "Compare versions (C)" : "Needs a second version"}">${icon("git-compare-arrows")}</button>
+    <button class="ghost icon" data-k="moreBtn" id="moreBtn" aria-haspopup="dialog" aria-expanded="false" aria-label="More" title="More">${icon("ellipsis")}</button>
+    ${approve}${apply}`);
+}
+// where an Apply notes run is, read off its log: Claude's tool calls follow the steps in apply-notes.md
+const TRACK = [["Reading", "Reading your notes"], ["Editing", "Making the changes"], ["Checking", "Building and checking"], ["Rendering", "Rendering the new version"], ["Wrapping up", "Checking the render"]];
+function trackStep(log) {
+  let step = 0, rendered = false;
+  for (const l of log) {
+    if (rendered && step < 4) step = 4;
+    if (/^→ Bash:.*\bnode build\.mjs.*--render/.test(l)) { step = Math.max(step, 3); rendered = true; continue; }
+    if (/^→ Bash:.*\bnode build\.mjs/.test(l)) step = Math.max(step, 2);
+    else if (/^→ (Edit|Write)\b|^→ Bash:.*(make\.mjs|render -q|-o \.\.\/)/.test(l)) step = Math.max(step, 1);
+  }
+  return step;
+}
+const clock = (ms) => { const s = Math.max(0, Math.round(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
+function trackerHtml(job) {
+  const o = job.outcome, step = trackStep(S.log), ok = !job.running && o?.newVersion, failed = !job.running && !ok;
+  const said = [...S.log].reverse().find((l) => !/^[→✓✗]/.test(l) && !/^Applying \d/.test(l)) ?? "";
+  const title = job.running ? TRACK[step][1] : ok ? `${vname(o.newVersion)} is ready` : o?.authError ? "Claude isn't signed in" : o?.code === 0 ? "Finished without a new version" : "Stopped before a new version";
+  const sub = job.running ? said : ok ? (o.stillOpen ? `${plural(o.stillOpen, "note")} stayed open: the log says why.` : "Every note is applied.") : o?.authError ? "Run claude in a terminal, type /login, then apply again." : "Your notes are still open: the log says why.";
+  const seg = (i) => ok ? "done" : i < step ? "done" : i === step ? (failed ? "fail" : "now") : "";
+  return `<div class="banner tracker ${ok ? (o.stillOpen ? "warn" : "good") : failed ? "bad" : ""}" role="status" aria-label="Applying notes: step ${step + 1} of 5, ${esc(TRACK[step][0])}">
+    <div class="top"><h3>${esc(title)}</h3><span class="clock" id="trackClock" data-started="${job.started}">${job.running ? clock(Date.now() - job.started) : ""}</span>${job.running ? "" : `<button class="ghost icon" id="dismissBanner" aria-label="Dismiss">×</button>`}</div>
+    <div class="steps" aria-hidden="true">${TRACK.map((_, i) => `<div class="seg ${seg(i)}"></div>`).join("")}</div>
+    <div class="labels" aria-hidden="true">${TRACK.map(([l], i) => `<span class="${i === step && !ok ? "on" : ""}">${esc(l)}</span>`).join("")}</div>
+    ${sub ? `<div class="said">${esc(sub.split("\n")[0].slice(0, 200))}</div>` : ""}
+  </div>`;
+}
+setInterval(() => { const c = $("trackClock"); if (c && S.doc?.job?.running) c.textContent = clock(Date.now() - Number(c.dataset.started)); }, 1000);
+function renderBanners() {
+  const d = S.doc, h = curHook(), job = d?.job, out = [];
+  if (h?.rendering) out.push(`<div class="banner"><span class="dot blue"></span><div class="msg">Rendering a new version of ${esc(h.label)}. It appears here when it's done.</div></div>`);
+  const dismissed = !!job && !job.running && localGet("dismissedJob", null) === job.started;
+  if (job && (job.running || job.outcome) && !dismissed) out.push(trackerHtml(job));
+  if (S.log.length && !dismissed) out.push(`<details class="logbox" id="logBox" ${S.logOpen ? "open" : ""}><summary>Apply log (${plural(S.log.length, "line")})</summary><div class="log" id="log" tabindex="0">${S.log.map((l) => `<div>${esc(l)}</div>`).join("")}</div></details>`);
+  $("banners").innerHTML = out.join("");
+  $("banners").style.display = out.length ? "flex" : "none"; $("banners").style.flexDirection = "column"; $("banners").style.gap = "6px";
+  // whatever the banners take comes off the picture, so the timeline stays on screen
+  const fit = () => document.documentElement.style.setProperty("--extra", `${out.length ? $("banners").offsetHeight + 10 : 0}px`); fit();
+  const lb = $("logBox"); if (lb) lb.addEventListener("toggle", () => { S.logOpen = lb.open; fit(); });
+  if (lb) lb.ontoggle = null;
+  const lg = $("log"); if (lg) lg.scrollTop = lg.scrollHeight;
+}
+$("banners").addEventListener("click", (e) => { if (e.target.closest("#dismissBanner")) { localSet("dismissedJob", S.doc?.job?.started ?? null); renderBanners(); } });
+
+async function doApprove(version) {
+  S.doc = await api(`/api/projects/${S.pid}/hooks/${S.cut}/approve`, { method: "POST", body: { version } }); syncDoc();
+  toast(`Approved ${version} → exports/approved/`, { label: "Undo", run: () => api(`/api/projects/${S.pid}/hooks/${S.cut}/approve`, { method: "POST", body: { version: null } }).then((d) => { S.doc = d; syncDoc(); }).catch(fail) });
+}
+function confirmDialog(title, html, yes) {
+  return new Promise((ok) => {
+    const dlg = $("confirmDlg"); $("confirmTitle").textContent = title; $("confirmBody").innerHTML = html; $("confirmYes").textContent = yes;
+    $("confirmYes").onclick = () => { dlg.close(); ok(true); }; $("confirmNo").onclick = () => { dlg.close(); ok(false); }; dlg.oncancel = () => ok(false);
+    dlg.showModal();
+  });
+}
+$("toolbar").addEventListener("click", async (e) => {
+  const t = e.target.closest("button"); if (!t) return;
+  const h = curHook();
+  try {
+    if (t.id === "moreBtn") { toggleMenu("more", t, moreMenu); return; }
+    if (t.id === "statusBtn") { showTab("checks"); return; }
+    if (t.id === "apply") { await api(`/api/projects/${S.pid}/hooks/${S.cut}/apply`, { method: "POST" }); S.log = []; toast("Claude is applying the notes"); await openProject(S.pid, true); return; }
+    if (t.id === "stop") { await api(`/api/projects/${S.pid}/apply/stop`, { method: "POST" }); return; }
+    if (t.id === "approve") {
+      const v = curVer(), issues = [...(v.qa?.issues ?? []), ...(S.insight?.findings ?? []).filter((f) => f.level === "error").map((f) => f.message)], open = hookState(h).open;
+      if ((issues.length || open) && !(await confirmDialog(`Approve ${vname(S.version)}?`, `${open ? `<p>${plural(open, "note")} still open on this cut.</p>` : ""}${issues.length ? `<p>Flagged on this version:</p><ul>${issues.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>` : ""}`, "Approve anyway"))) return;
+      await doApprove(S.version); return;
+    }
+    if (t.id === "unapprove") { S.doc = await api(`/api/projects/${S.pid}/hooks/${S.cut}/approve`, { method: "POST", body: { version: null } }); syncDoc(); toast("Approval removed. The exported file is still in exports/approved/."); return; }
+    if (t.id === "compareBtn") { toggleCompare(); return; }
+  } catch (err) { fail(err); }
+});
+function selectVersion(version) {
+  const keep = vid()?.currentTime;
+  if (keep != null) S.seekTo = keep;
+  S.flip = snapshotFrame();
+  S.version = version; S.insight = null;
+  api(`/api/projects/${S.pid}/hooks/${S.cut}/active`, { method: "POST", body: { version } }).catch(fail);
+  updateHash(); renderAll(); loadInsight();
+}
+function toggleCompare() {
+  const h = curHook(); if (!h || (h.versions.length < 2 && Object.keys(S.doc.hooks).length < 2)) return;
+  // the playhead carries across, so a moment spotted in one view can be checked in the other
+  const t = (S.compare ? $("cmpA") : vid())?.currentTime ?? 0;
+  S.compare = !S.compare; if (S.compare) setupCompare();
+  if (!S.compare) S.seekTo = t;
+  renderToolbar(); renderStage();
+  if (S.compare) { const a = $("cmpA"); a?.addEventListener("loadedmetadata", () => { a.currentTime = t; $("cmpB").currentTime = t; }, { once: true }); }
+}
+// a server update: refresh what's on screen without touching the video element
+function syncDoc() { const i = S.projects.findIndex((d) => d.project_id === S.pid); if (i >= 0) S.projects[i] = S.doc; renderShell(); renderToolbar(); renderTimeline(); renderPanel(); }
+
+// ---------- stage ----------
+const vid = () => $("player");
+
+// ---------- drawing on the frame ----------
+// Strokes are kept in 0–1 coordinates and drawn in a 1600×900 box, so they land on the same spot at any player size.
+// A drawing belongs to the next note saved; a saved note's drawing shows again whenever the playhead is paused on it.
+const INK_W = 1600, INK_H = 900;
+const INK_TOOLS = [["pen", "pencil", "Pen"], ["arrow", "arrow-up-right", "Arrow"], ["box", "square", "Box"], ["ring", "circle", "Circle"]];
+const INK_COLORS = [["#FF8933", "Orange"], ["#FFFFFF", "White"], ["#FF3B30", "Red"]];
+S.draw = { on: false, tool: localGet("inkTool", "arrow"), color: localGet("inkColor", "#FF8933"), strokes: [] };
+function inkD(s) {
+  const P = s.points.map(([x, y]) => [x * INK_W, y * INK_H]), a = P[0], b = P.at(-1), n = (v) => v.toFixed(1);
+  if (s.tool === "pen") return P.length === 1 ? `M${n(a[0])} ${n(a[1])}h0.1` : "M" + P.map((q) => `${n(q[0])} ${n(q[1])}`).join("L");
+  if (s.tool === "box") return `M${n(a[0])} ${n(a[1])}H${n(b[0])}V${n(b[1])}H${n(a[0])}Z`;
+  if (s.tool === "ring") { const rx = Math.abs(b[0] - a[0]) / 2, ry = Math.abs(b[1] - a[1]) / 2, cx = (a[0] + b[0]) / 2, cy = (a[1] + b[1]) / 2; return `M${n(cx - rx)} ${n(cy)}a${n(rx)} ${n(ry)} 0 1 0 ${n(2 * rx)} 0a${n(rx)} ${n(ry)} 0 1 0 ${n(-2 * rx)} 0`; }
+  const ang = Math.atan2(b[1] - a[1], b[0] - a[0]), head = (d) => [b[0] + 38 * Math.cos(ang + d), b[1] + 38 * Math.sin(ang + d)];
+  const [h1, h2] = [head(2.6), head(-2.6)];
+  return `M${n(a[0])} ${n(a[1])}L${n(b[0])} ${n(b[1])}M${n(h1[0])} ${n(h1[1])}L${n(b[0])} ${n(b[1])}L${n(h2[0])} ${n(h2[1])}`;
+}
+const INK_STYLE = 'fill="none" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"';
+const inkSvg = (strokes) => strokes.map((s) => `<path d="${inkD(s)}" stroke="${s.color}" ${INK_STYLE}/>`).join("");
+// what the overlay shows: the drawing in progress, else the drawing on the note under a paused playhead
+function shownStrokes() {
+  const p = vid();
+  if (S.draw.on || (S.draw.strokes.length && p?.paused)) return S.draw.strokes;
+  const n = p?.paused && S.nowNote ? curHook()?.notes.find((x) => x.id === S.nowNote) : null;
+  return n?.drawing && n.version === S.version ? n.drawing.strokes : [];
+}
+function renderInk() { const svg = $("ink"); if (svg) svg.innerHTML = inkSvg(shownStrokes()); }
+function renderInkbar() {
+  const bar = $("inkbar"); if (!bar) return;
+  bar.hidden = !S.draw.on;
+  localSet("inkTool", S.draw.tool); localSet("inkColor", S.draw.color);
+  bar.innerHTML = INK_TOOLS.map(([k, ic, label]) => `<button data-k="tool-${k}" data-tool="${k}" aria-pressed="${S.draw.tool === k}" aria-label="${label}" title="${label}">${icon(ic)}</button>`).join("")
+    + `<span class="sep"></span>` + INK_COLORS.map(([c, label]) => `<button data-k="color-${c}" data-color="${c}" aria-pressed="${S.draw.color === c}" aria-label="${label}" title="${label}"><span class="sw" style="--c:${c}"></span></button>`).join("")
+    + `<span class="sep"></span><button data-k="inkUndo" id="inkUndo" aria-label="Undo" title="Undo (⌘Z)" ${S.draw.strokes.length ? "" : "disabled"}>${icon("undo-2")}</button><button data-k="inkClear" id="inkClear" aria-label="Clear the drawing" title="Clear" ${S.draw.strokes.length ? "" : "disabled"}>${icon("trash-2")}</button>`
+    + `<button class="done" data-k="inkDone" id="inkDone">Done</button>`;
+}
+// the note box opens as soon as there's a drawing, and Save works with a drawing alone
+function inkChanged() { renderInkbar(); $("saveBtn").disabled = !ta.value.trim() && !S.draw.strokes.length; if (S.draw.strokes.length) $("composer").classList.add("open"); }
+function inkUndo() { S.draw.strokes.pop(); renderInk(); inkChanged(); }
+function setDraw(on) {
+  const st = $("stage"), p = vid(); if (!st || !p) return;
+  S.draw.on = on;
+  if (on && !p.paused) p.pause();
+  st.classList.toggle("drawing", on);
+  $("drawBtn")?.setAttribute("aria-pressed", on);
+  renderInkbar(); renderInk();
+  if (on) { if (S.tab !== "notes") showTab("notes"); $("composer").classList.add("open"); }
+}
+function wireInk() {
+  const svg = $("ink"); if (!svg) return;
+  if (S.draw.on) { $("stage").classList.add("drawing"); $("drawBtn")?.setAttribute("aria-pressed", true); }
+  renderInkbar(); renderInk();
+  let cur = null;
+  const at = (e) => { const r = svg.getBoundingClientRect(); return [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))]; };
+  svg.onpointerdown = (e) => {
+    if (!S.draw.on || e.button !== 0) return;
+    e.preventDefault(); svg.setPointerCapture(e.pointerId);
+    const q = at(e); cur = { tool: S.draw.tool, color: S.draw.color, points: S.draw.tool === "pen" ? [q] : [q, q] };
+    S.draw.strokes.push(cur); renderInk();
+  };
+  svg.onpointermove = (e) => {
+    if (!cur) return;
+    const q = at(e);
+    if (cur.tool === "pen") { const l = cur.points.at(-1); if (Math.hypot(q[0] - l[0], q[1] - l[1]) > 0.002) cur.points.push(q); } else cur.points[1] = q;
+    renderInk();
+  };
+  svg.onpointerup = svg.onpointercancel = () => {
+    if (!cur) return;
+    // a click with a shape tool draws nothing
+    const [a, b] = [cur.points[0], cur.points.at(-1)];
+    if (cur.tool !== "pen" && Math.hypot(b[0] - a[0], b[1] - a[1]) < 0.01) S.draw.strokes.pop();
+    cur = null; renderInk(); inkChanged();
+  };
+}
+// the frame under the playhead with the drawing burned in, for the editor who applies the note
+function inkFrame(strokes) {
+  try {
+    const p = vid(), c = document.createElement("canvas"); c.width = 1280; c.height = 720;
+    const g = c.getContext("2d"); g.drawImage(p, 0, 0, c.width, c.height);
+    g.scale(c.width / INK_W, c.height / INK_H); g.lineWidth = 7; g.lineCap = "round"; g.lineJoin = "round"; g.shadowColor = "rgba(0,0,0,.65)"; g.shadowBlur = 3;
+    for (const s of strokes) { g.strokeStyle = s.color; g.stroke(new Path2D(inkD(s))); }
+    return c.toDataURL("image/jpeg", 0.86);
+  } catch { return null; }
+}
+// flipping between versions holds the current frame until the new one has landed on the same moment, so differences read as differences, not a flash of black
+function snapshotFrame() {
+  const p = vid(); if (!p || !p.videoWidth) return null;
+  try { const c = document.createElement("canvas"); c.width = p.videoWidth; c.height = p.videoHeight; c.getContext("2d").drawImage(p, 0, 0); c.className = "flip"; c.setAttribute("aria-hidden", "true"); return c; } catch { return null; }
+}
+function renderStage() {
+  const h = curHook(), v = curVer(), key = S.compare ? `cmp|${S.cmp.left}|${S.cmp.right}|${S.cmpMode}` : `${S.pid}|${S.cut}|${S.version}|${v?.created_at}`;
+  if (!h || !h.versions.length) {
+    S.stageKey = null;
+    $("player-area").innerHTML = h?.rendering ? `<div class="empty big"><h2>Rendering v1</h2><p>The first version of this project appears here when it's done.</p></div>` : `<div class="empty big"><h2>No renders yet</h2><p>Render this episode and it shows up here on its own.</p></div>`;
+    return;
+  }
+  if (key === S.stageKey) { renderTimeline(); return; }
+  S.stageKey = key;
+  if (S.compare) { $("player-area").innerHTML = compareHtml(); wireCompare(); return; }
+  $("player-area").innerHTML = `
+    <div class="stage" id="stage">
+      <video id="player" src="/files/${esc(v.video_path)}?t=${encodeURIComponent(v.created_at)}" preload="auto" playsinline aria-label="${esc(S.doc.title)}, ${esc(h.label)} ${esc(v.version)}"></video>
+      <button class="bigplay" id="bigplay" aria-label="Play">${icon("play", "fill")}</button>
+      <div class="guides" id="guides" ${S.guides ? "" : "hidden"}><i class="action"></i><i class="title"></i><i class="mid"></i></div>
+      <svg class="ink" id="ink" viewBox="0 0 ${INK_W} ${INK_H}" preserveAspectRatio="none" aria-hidden="true"></svg>
+    </div>
+    <div class="inkbar" id="inkbar" role="toolbar" aria-label="Drawing tools" hidden></div>
+    <div class="spoken" id="spoken" aria-hidden="true"></div>
+    <div class="transport">
+      <button class="playbtn" data-k="play" id="play" aria-label="Play" title="Play / pause (Space)" data-desc="Play or pause this version.">${icon("play", "fill play")}</button>
+      <button class="icon ghost opt-wide" data-k="s-1" data-step="-1" aria-label="Back 1 second" title="Back 1 second (Shift+←)" data-desc="Jump back one second.">−1s</button>
+      <button class="icon ghost" data-k="s-f" data-frame="-1" aria-label="Back 1 frame" title="Back 1 frame (←)" data-desc="Step back a single frame to find the exact cut.">${icon("chevron-left")}</button>
+      <button class="icon ghost" data-k="s+f" data-frame="1" aria-label="Forward 1 frame" title="Forward 1 frame (→)" data-desc="Step forward a single frame.">${icon("chevron-right")}</button>
+      <button class="icon ghost opt-wide" data-k="s+1" data-step="1" aria-label="Forward 1 second" title="Forward 1 second (Shift+→)" data-desc="Jump forward one second.">+1s</button>
+      <span class="readout" id="readout" role="timer" aria-live="off" title="Timecode" data-desc="Playhead / length, and the frame number.">0:00.0 / 0:00.0</span>
+      <button class="drawbtn" id="drawBtn" aria-pressed="false" title="Draw on the frame (D)" data-desc="Sketch on the paused frame. The drawing is attached to your next note.">${icon("pencil")}<span>Draw</span></button>
+      <span class="spacer"></span>
+      <label class="sr opt-wide" for="rate">Playback speed</label>
+      <select id="rate" class="opt-wide" title="Playback speed" data-desc="Play slower to check timing, or faster to skim.">${[0.25, 0.5, 1, 1.5, 2].map((r) => `<option value="${r}" ${r === S.rate ? "selected" : ""}>${r}×</option>`).join("")}</select>
+      <button class="icon toggle opt-wide" id="loopBtn" aria-pressed="${S.loop}" aria-label="Loop the marked range" title="Loop the marked range (R)" data-desc="Replay the In–Out range over and over. Set it with I and O.">${icon("repeat")}</button>
+      <button class="icon toggle opt-wide" id="guidesBtn" aria-pressed="${S.guides}" aria-label="Safe-area guides" title="Safe-area guides (G)" data-desc="Show the safe-area frames so titles stay clear of the edges and the face.">${icon("guides")}</button>
+      <button class="icon toggle" id="muteBtn" aria-pressed="${S.muted}" aria-label="Mute" title="Mute (M)" data-desc="Turn the sound off or on.">${icon(S.muted ? "volume-x" : "volume-2")}</button>
+      <button class="icon toggle" id="fsBtn" aria-label="Fullscreen" title="Fullscreen (F)" data-desc="Fill the screen with the video. Esc to leave.">${icon("maximize")}</button>
+    </div>
+    <div class="tl" id="tl"></div>`;
+  if (S.flip) { $("stage").appendChild(S.flip); const c = S.flip; S.flip = null; const done = () => { c.style.opacity = 0; setTimeout(() => c.remove(), 160); }; const p = vid(); p.addEventListener("seeked", done, { once: true }); setTimeout(done, 1500); }
+  wirePlayer();
+  wireInk();
+  renderTimeline();
+}
+$("player-area").addEventListener("click", (e) => {
+  const t = e.target.closest("button"); if (!t) return;
+  const p = vid();
+  if (t.dataset.step) { step(Number(t.dataset.step)); return; }
+  if (t.dataset.frame) { step(Number(t.dataset.frame) / (S.doc.fps || 24)); return; }
+  if (t.id === "play" || t.id === "bigplay") { togglePlay(); return; }
+  if (t.id === "loopBtn") { toggleLoop(); return; }
+  if (t.id === "guidesBtn") { toggleGuides(); return; }
+  if (t.id === "muteBtn") { toggleMute(); return; }
+  if (t.id === "drawBtn") { setDraw(!S.draw.on); return; }
+  if (t.dataset.tool) { S.draw.tool = t.dataset.tool; renderInkbar(); return; }
+  if (t.dataset.color) { S.draw.color = t.dataset.color; renderInkbar(); return; }
+  if (t.id === "inkUndo") { inkUndo(); return; }
+  if (t.id === "inkClear") { S.draw.strokes = []; renderInk(); inkChanged(); return; }
+  if (t.id === "inkDone") { setDraw(false); pinHere(); return; }
+  if (t.id === "fsBtn") { $("stage")?.requestFullscreen?.(); return; }
+  if (t.dataset.note) { jumpToNote(t.dataset.note); return; }
+  if (t.dataset.finding != null) { showTab("checks"); seek(Number(t.dataset.finding)); return; }
+  if (t.id === "cmpPlay") { cmpToggle(); return; }
+  if (t.dataset.mode) { S.cmpMode = t.dataset.mode; localSet("cmpMode", S.cmpMode); renderStage(); return; }
+  if (t.dataset.audio) { S.cmpAudio = t.dataset.audio; applyCmpAudio(); return; }
+  if (t.id === "cmpSwap") { [S.cmp.left, S.cmp.right] = [S.cmp.right, S.cmp.left]; renderStage(); return; }
+  void p;
+});
+const togglePlay = () => { const p = S.compare ? $("cmpA") : vid(); if (!p) return; if (S.compare) return cmpToggle(); p.paused ? p.play().catch(() => {}) : p.pause(); };
+const seek = (t) => { const p = vid(); if (!p) return; p.pause(); p.currentTime = Math.max(0, Math.min(p.duration || 1e9, t)); };
+const step = (d) => { const p = S.compare ? $("cmpA") : vid(); if (!p) return; p.pause(); p.currentTime = Math.max(0, Math.min(p.duration || 1e9, p.currentTime + d)); if (S.compare) $("cmpB").currentTime = p.currentTime; };
+const toggleLoop = () => { if (S.rin == null) { toast("Mark a range first: I at the start, O at the end"); return; } S.loop = !S.loop; $("loopBtn")?.setAttribute("aria-pressed", S.loop); };
+const toggleGuides = () => { S.guides = !S.guides; const g = $("guides"); if (g) g.hidden = !S.guides; $("guidesBtn")?.setAttribute("aria-pressed", S.guides); };
+const toggleMute = () => { S.muted = !S.muted; localSet("muted", S.muted); const p = vid(); if (p) p.muted = S.muted; const b = $("muteBtn"); if (b) { b.setAttribute("aria-pressed", S.muted); b.innerHTML = icon(S.muted ? "volume-x" : "volume-2"); } };
+
+function wirePlayer() {
+  const p = vid(), h = curHook();
+  p.muted = S.muted; p.defaultPlaybackRate = S.rate; p.playbackRate = S.rate;
+  $("rate").onchange = (e) => { S.rate = Number(e.target.value); localSet("rate", S.rate); p.playbackRate = S.rate; };
+  let raf = 0;
+  const tick = () => { paint(); if (!p.paused) raf = requestAnimationFrame(tick); };
+  const syncBtn = () => { const label = p.paused ? "Play" : "Pause", play = $("play"); if (play) { play.innerHTML = p.paused ? icon("play", "fill play") : icon("pause", "fill"); play.setAttribute("aria-label", label); } const big = $("bigplay"); if (big) big.hidden = !p.paused || p.currentTime > 0.05; };
+  p.addEventListener("loadeddata", syncBtn);
+  p.addEventListener("play", () => { if (S.draw.on) setDraw(false); syncBtn(); cancelAnimationFrame(raf); tick(); renderInk(); });
+  p.addEventListener("pause", () => { syncBtn(); paint(); renderInk(); });
+  p.addEventListener("seeked", () => { syncBtn(); paint(); updateHash(); });
+  p.addEventListener("ended", syncBtn);
+  p.addEventListener("loadedmetadata", () => { if (S.seekTo != null) { p.currentTime = S.seekTo; S.seekTo = null; } renderTimeline(); paint(); syncBtn(); });
+  p.addEventListener("click", () => {
+    if (S.draw.on) return;
+    const wasPaused = p.paused; togglePlay();
+    if (calm()) return;
+    const g = document.createElement("div"); g.className = "pulse"; g.setAttribute("aria-hidden", "true"); g.innerHTML = icon(wasPaused ? "play" : "pause", "fill");
+    $("stage").appendChild(g); g.animate([{ opacity: 1, transform: "scale(.85)" }, { opacity: 0, transform: "scale(1.15)" }], { duration: 320, easing: "ease-out" }); setTimeout(() => g.remove(), 340);
+  });
+  // a version counts as reviewed once it has been watched for 2 s
+  let watched = 0, last = 0;
+  p.addEventListener("timeupdate", () => {
+    if (!p.paused) { watched += Math.max(0, Math.min(0.5, p.currentTime - last)); if (watched > 2 && h.reviewed_version !== S.version) { h.reviewed_version = S.version; api(`/api/projects/${S.pid}/hooks/${S.cut}/reviewed`, { method: "POST", body: { version: S.version } }).catch(() => {}); } }
+    last = p.currentTime;
+  });
+}
+function paint() {
+  const p = vid(); if (!p) return;
+  const dur = p.duration || curVer()?.duration_sec || 1, t = p.currentTime, fps = S.doc.fps || 24;
+  const r = $("readout"); if (r) r.innerHTML = `${fmt(t)} <small>/ ${fmt(dur)} · f${Math.round(t * fps)}</small>`;
+  const head = $("head"); if (head) head.style.left = `${(t / dur) * 100}%`;
+  const sl = $("tracks"); if (sl) { sl.setAttribute("aria-valuenow", t.toFixed(1)); sl.setAttribute("aria-valuetext", spoken(t)); }
+  markNow(t);
+  followHead(t, dur, p.paused);
+  if (S.loop && S.rin != null && S.rout != null && !p.paused && t >= Math.max(S.rin, S.rout)) p.currentTime = Math.min(S.rin, S.rout);
+  const io = $("inout");
+  if (io) { if (S.rin != null) { io.hidden = false; const a = S.rin, b = S.rout ?? t; io.style.left = `${(Math.min(a, b) / dur) * 100}%`; io.style.width = `${(Math.abs(b - a) / dur) * 100}%`; } else io.hidden = true; }
+  if (!S.composing) { S.pin = t; updateWhen(); }
+  paintSpoken(t);
+}
+// the note under the playhead lights up in the list and on the timeline
+function markNow(t) {
+  const h = curHook(); if (!h) return;
+  const id = h.notes.filter((n) => S.showDone || n.status === "open").find((n) => { const end = n.timestamp_end ?? n.timestamp_start + 0.6; return t >= n.timestamp_start - 0.1 && t <= end; })?.id ?? null;
+  if (id === S.nowNote) return;
+  S.nowNote = id;
+  renderInk();
+  document.querySelectorAll(".note.now, .marker.now").forEach((x) => x.classList.remove("now"));
+  if (id) { $("noteList").querySelector(`[data-id="${CSS.escape(id)}"]`)?.classList.add("now"); $("tl")?.querySelector(`[data-note="${CSS.escape(id)}"]`)?.classList.add("now"); }
+}
+function followHead(t, dur, paused) {
+  const sc = $("tlScroll"); if (!sc || S.zoom === 1 || S.dragging) return;
+  const x = (t / dur) * sc.scrollWidth;
+  if (x < sc.scrollLeft + 20 || x > sc.scrollLeft + sc.clientWidth - 20) sc.scrollLeft = paused ? x - sc.clientWidth / 2 : x - 40;
+}
+// phrases of up to nine words, broken at pauses and punctuation
+function phraseOf(words, i) {
+  if (S.phrases?.words !== words) {
+    const list = []; let from = 0;
+    words.forEach((w, k) => { const next = words[k + 1]; if (!next || k - from >= 8 || /[.?!,]$/.test(w.text) && k - from >= 2 || next.start - w.end > 0.45) { list.push([from, k + 1]); from = k + 1; } });
+    S.phrases = { words, list };
+  }
+  return S.phrases.list.find(([a, b]) => i >= a && i < b);
+}
+function paintSpoken(t) {
+  const words = S.insight?.words ?? [], box = $("spoken");
+  const i = words.findIndex((w) => t < w.end + 0.05);
+  if (box) {
+    const c = i < 0 ? null : phraseOf(words, i);
+    if (!c) { if (S.phraseShown !== null) { box.textContent = ""; S.phraseShown = null; } }
+    else {
+      if (S.phraseShown !== `${S.version}:${c[0]}`) { S.phraseShown = `${S.version}:${c[0]}`; box.innerHTML = words.slice(c[0], c[1]).map((w, k) => `<span data-w="${c[0] + k}">${esc(w.text)}</span>`).join(" "); }
+      box.querySelectorAll("span").forEach((el) => { const k = Number(el.dataset.w); el.classList.toggle("on", k <= i && t >= words[k].start - 0.05); });
+    }
+  }
+  if (S.tab === "script" && i !== S.scriptNow) {
+    S.scriptNow = i;
+    document.querySelectorAll("#script button").forEach((b) => { const k = Number(b.dataset.i); b.classList.toggle("now", k === i); b.classList.toggle("past", k < i); });
+    $("script").querySelector(".now")?.scrollIntoView({ block: "nearest" });
+  }
+}
+
+// ---------- timeline ----------
+function renderTimeline() {
+  const box = $("tl"), v = curVer(), h = curHook(); if (!box || !v) return;
+  const prevScroll = $("tlScroll")?.scrollLeft ?? 0, prevNotes = S.markerIds;
+  const p = vid(), P = plan(), dur = p?.duration || v.duration_sec || P?.total || 1;
+  const pct = (t) => `${(t / dur) * 100}%`, w = (a, b) => `${(Math.max(0, b - a) / dur) * 100}%`;
+  const px = Math.max(300, (box.clientWidth - 72) * S.zoom), fits = (a, b, n) => ((b - a) / dur) * px >= n;
+  const every = px / dur > 90 ? 1 : px / dur > 28 ? 2 : px / dur > 12 ? 5 : 10;
+  const ticks = []; for (let t = 0; t < dur; t += every) ticks.push(`<span class="tick" style="left:${pct(t)}">${fmt(t).replace(/\.\d$/, "")}</span>`);
+  const shown = h.notes.filter((n) => S.showDone || n.status === "open");
+  const notes = shown.map((n) => {
+    const range = n.timestamp_end != null && n.timestamp_end > n.timestamp_start, fresh = prevNotes && !prevNotes.has(n.id);
+    return `<button class="marker ${range ? "range" : ""} ${n.status === "done" ? "done" : ""} ${n.version !== S.version ? "old" : ""} ${fresh && !calm() ? "pop-in" : ""}" data-note="${esc(n.id)}" aria-label="Note at ${fmt(n.timestamp_start)}: ${esc(n.text)}" title="${fmt(n.timestamp_start)} ${esc(n.text)}" style="left:${pct(n.timestamp_start)};${range ? `width:${w(n.timestamp_start, n.timestamp_end)}` : ""}"></button>`;
+  });
+  S.markerIds = new Set(shown.map((n) => n.id));
+  const stems = shown.map((n) => `<div class="stem ${n.status === "done" ? "done" : ""}" style="left:${pct(n.timestamp_start)}"></div>`).join("");
+  const flags = (S.insight?.findings ?? []).filter((f) => f.t != null && f.level !== "info").map((f) => `<button class="marker finding" data-finding="${f.t}" aria-label="Check at ${fmt(f.t)}: ${esc(f.message)}" title="${fmt(f.t)} ${esc(f.message)}" style="left:${pct(f.t)}">${icon("triangle-alert")}</button>`);
+  const typeVar = (s) => `var(${(TYPES[s.type] ?? TYPES.broll)[1]})`;
+  const shots = (P?.visible ?? []).map((s) => `<div class="shot ${s.type === "host" ? "host" : ""}" style="left:${pct(s.start)};width:${w(s.start, s.end)};--c:${typeVar(s)}">${s.type !== "host" && fits(s.start, s.end, 62) ? `<span>${esc(s.label)}</span>` : ""}</div>`).join("");
+  const titles = (P?.titles ?? []).map((x) => `<div class="chip ${x.style === "center" || x.style === "behind" ? "center" : ""}" title="${esc(x.plain)}" style="left:${pct(x.start)};width:${w(x.start, x.end)}">${fits(x.start, x.end, 44) ? esc(x.plain) : ""}</div>`).join("");
+  const card = P?.guestCard ? `<div class="chip guest" style="left:${pct(P.guestCard.start)};width:${w(P.guestCard.start, P.guestCard.end)}">${fits(P.guestCard.start, P.guestCard.end, 44) ? "Guest card" : ""}</div>` : "";
+  const moves = (P?.moves ?? []).map((m) => m.type === "push" ? `<div class="push" style="left:${pct(m.start)};width:${w(m.start, m.end)}"></div>` : `<div class="punch-in" style="left:${pct(m.start)}"></div>`).join("");
+  const breaths = (P?.breaths ?? []).map((b) => `<div class="breath" title="Ducked breath" style="left:${pct(b.start)};width:${w(b.start, b.end)}"></div>`).join("");
+  const jumps = (P?.jumps ?? []).map((t) => `<div class="jump" title="Jump cut" style="left:${pct(t)}"></div>`).join("");
+  const loading = !S.insight;
+  box.innerHTML = `
+    <div class="tl-labels" aria-hidden="true">
+      <div class="h-lane"><button class="icon ghost" data-zoom="-1" tabindex="-1" title="Zoom out (−)">${icon("zoom-out")}</button><button class="icon ghost" data-zoom="1" tabindex="-1" title="Zoom in (+)">${icon("zoom-in")}</button></div>
+      <div class="h-ruler"></div>
+      <div class="h-picture"><span class="label-text">Picture</span></div>
+      ${P || loading ? `<div class="h-titles"><span class="label-text">Titles</span></div><div class="h-camera"><span class="label-text">Camera</span></div>` : ""}
+      <div class="h-voice"><span class="label-text">Voice</span></div>
+    </div>
+    <div class="tl-scroll" id="tlScroll"><div class="tl-inner" style="width:${S.zoom * 100}%">
+      <div class="lane-notes">${flags.join("")}${notes.join("")}</div>
+      <div class="tracks" id="tracks" role="slider" tabindex="0" aria-label="Playhead" aria-valuemin="0" aria-valuemax="${dur.toFixed(1)}" aria-valuenow="0" aria-valuetext="0 seconds">
+        <div class="track t-ruler h-ruler"><div class="track-body">${ticks.join("")}</div></div>
+        <div class="track t-picture h-picture"><div class="track-body ${S.insight?.media ? "" : "sk"}"><canvas id="strip"></canvas>${shots}</div></div>
+        ${P || loading ? `<div class="track t-titles h-titles"><div class="track-body ${loading ? "sk" : ""}">${titles}${card}</div></div>
+        <div class="track t-camera h-camera"><div class="track-body ${loading ? "sk" : ""}">${moves}</div></div>` : ""}
+        <div class="track t-voice h-voice"><div class="track-body ${S.insight?.media ? "" : "sk"}"><canvas id="wave"></canvas>${breaths}${jumps}</div></div>
+      </div>
+      <div class="playzone">${stems}<div class="inout" id="inout" style="top:18px" hidden></div><div class="head" id="head"></div></div>
+    </div></div>
+    <div class="hover-card" id="hoverCard" hidden><div class="frame" id="hoverFrame"></div><div class="cap"><span id="hoverTime"></span><span id="hoverShot"></span></div></div>`;
+  $("tlScroll").scrollLeft = prevScroll;
+  wireTimeline(dur);
+  drawStrip(); drawWave();
+  if (S.nowNote) { const id = S.nowNote; S.nowNote = null; void id; }
+  paint();
+}
+function setZoom(z, anchorFrac) {
+  const sc = $("tlScroll"); z = Math.max(1, Math.min(8, z)); if (z === S.zoom) return;
+  const f = anchorFrac ?? ((vid()?.currentTime ?? 0) / (vid()?.duration || 1));
+  const screen = sc ? f * sc.scrollWidth - sc.scrollLeft : 0;
+  S.zoom = z; renderTimeline();
+  const s2 = $("tlScroll"); if (s2) s2.scrollLeft = f * s2.scrollWidth - screen;
+}
+function wireTimeline(dur) {
+  const tl = $("tracks"), box = $("tl"), card = $("hoverCard"), p = vid(), sc = $("tlScroll");
+  const at = (e) => { const r = tl.getBoundingClientRect(); return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * dur; };
+  const go = (e) => { if (p) p.currentTime = at(e); };
+  tl.onpointerdown = (e) => {
+    p?.pause(); go(e); if (e.pointerType === "touch") return;
+    S.dragging = true; tl.setPointerCapture(e.pointerId);
+    // Shift+drag marks a range for the next note
+    if (e.shiftKey) { S.rin = at(e); S.rout = S.rin; tl.onpointermove = (m) => { S.rout = at(m); go(m); }; }
+    else tl.onpointermove = go;
+  };
+  tl.onpointerup = () => { tl.onpointermove = null; S.dragging = false; };
+  box.onpointermove = (e) => {
+    if (!e.target.closest("#tracks") || e.pointerType === "touch") { card.hidden = true; return; }
+    const t = at(e), r = box.getBoundingClientRect(), m = S.insight?.media;
+    card.hidden = false;
+    card.style.left = `${Math.max(100, Math.min(r.width - 100, e.clientX - r.left))}px`;
+    $("hoverTime").textContent = fmt(t);
+    const shot = plan()?.visible.find((s) => t >= s.start && t < s.end); $("hoverShot").textContent = shot ? (shot.type === "host" ? shot.label : `${shot.label} · ${(TYPES[shot.type] ?? TYPES.broll)[0]}`) : "";
+    const f = $("hoverFrame");
+    if (m) { const total = Math.ceil(dur * m.strip_fps), n = Math.min(Math.floor(t * m.strip_fps), total - 1); f.style.backgroundImage = `url("/files/${m.strip}")`; f.style.backgroundSize = `${total * 100}% 100%`; f.style.backgroundPosition = `${(n / Math.max(1, total - 1)) * 100}% 0`; f.hidden = false; } else f.hidden = true;
+  };
+  box.onpointerleave = () => { card.hidden = true; };
+  sc.onwheel = (e) => { if (!e.ctrlKey && !e.metaKey) return; e.preventDefault(); const r = sc.getBoundingClientRect(); setZoom(S.zoom * (e.deltaY < 0 ? 1.25 : 0.8), (e.clientX - r.left + sc.scrollLeft) / sc.scrollWidth); };
+  box.querySelectorAll("[data-zoom]").forEach((b) => { b.onclick = () => setZoom(S.zoom * (Number(b.dataset.zoom) > 0 ? 1.5 : 1 / 1.5)); });
+}
+const imgCache = new Map();
+function loadImage(src) { if (!imgCache.has(src)) imgCache.set(src, new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = bad; i.src = src; })); return imgCache.get(src); }
+const peakCache = new Map();
+function loadPeaks(src) { if (!peakCache.has(src)) peakCache.set(src, fetch(src).then((r) => r.json())); return peakCache.get(src); }
+const fitCanvas = (c) => { const r = c.getBoundingClientRect(), dpr = devicePixelRatio || 1; c.width = Math.max(1, Math.round(r.width * dpr)); c.height = Math.max(1, Math.round(r.height * dpr)); return c.getContext("2d"); };
+async function drawStrip() {
+  const c = $("strip"), m = S.insight?.media; if (!c || !m) return;
+  const img = await loadImage(`/files/${m.strip}`).catch(() => null); if (!img || !c.isConnected) return;
+  const g = fitCanvas(c), frames = Math.round(img.width / m.strip_w), tileW = (c.height * 16) / 9, n = Math.ceil(c.width / tileW);
+  for (let i = 0; i < n; i++) { const f = Math.min(frames - 1, Math.floor(((i + 0.5) / n) * frames)); g.drawImage(img, f * m.strip_w, 0, m.strip_w, m.strip_h, i * tileW, 0, tileW, c.height); }
+}
+async function drawWave() {
+  const c = $("wave"), m = S.insight?.media; if (!c || !m) return;
+  const data = await loadPeaks(`/files/${m.peaks}`).catch(() => null); if (!data || !c.isConnected) return;
+  const g = fitCanvas(c), mid = c.height / 2, v = data.values, n = c.width;
+  g.fillStyle = "#ff8933"; g.globalAlpha = 0.85;
+  for (let x = 0; x < n; x++) {
+    const a = Math.floor((x / n) * v.length), b = Math.max(a + 1, Math.floor(((x + 1) / n) * v.length));
+    let peak = 0; for (let i = a; i < b; i++) peak = Math.max(peak, v[i] ?? 0);
+    const h = Math.max(1, (peak / 255) * c.height * 0.95);
+    g.fillRect(x, mid - h / 2, 1, h);
+  }
+}
+let resizeTimer; addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { renderTimeline(); renderTabs(); }, 120); });
+
+// ---------- compare ----------
+function setupCompare() {
+  const h = curHook(), i = h.versions.findIndex((x) => x.version === S.version);
+  const prev = h.versions[i - 1] ?? h.versions[i + 1];
+  if (prev) { S.cmp.left = `${S.cut}|${prev.version}`; S.cmp.right = `${S.cut}|${S.version}`; }
+  else { const other = Object.keys(S.doc.hooks).find((k) => k !== S.cut); S.cmp.left = `${S.cut}|${S.version}`; S.cmp.right = `${other}|${latest(S.doc.hooks[other])}`; }
+}
+const cmpVer = (key) => { const [c, ver] = key.split("|"); return S.doc.hooks[c].versions.find((x) => x.version === ver); };
+const cmpLabel = (key) => { const [c, ver] = key.split("|"); return `${S.doc.hooks[c].label} ${ver}`; };
+function compareHtml() {
+  const opts = Object.entries(S.doc.hooks).flatMap(([k, h]) => h.versions.map((v) => [`${k}|${v.version}`, `${h.label} ${vfull(v.version)}`]));
+  const select = (side, label) => `<label class="sr" for="cmp-${side}">${label}</label><select class="cmp-select" id="cmp-${side}" data-side="${side}">${opts.map(([k, l]) => `<option value="${k}" ${k === S.cmp[side] ? "selected" : ""}>${esc(l)}</option>`).join("")}</select>`;
+  const src = (key) => `/files/${esc(cmpVer(key).video_path)}`;
+  const head = `<div class="bar">${select("left", "Left version")}<button class="icon ghost" id="cmpSwap" aria-label="Swap sides" title="Swap sides">${icon("arrow-left-right")}</button>${select("right", "Right version")}
+    <span class="spacer" style="flex:1"></span><span class="small">View</span>
+    <button class="pill" data-mode="wipe" aria-pressed="${S.cmpMode === "wipe"}">Wipe</button><button class="pill" data-mode="side" aria-pressed="${S.cmpMode === "side"}">Side by side</button></div>`;
+  const stage = S.cmpMode === "wipe"
+    ? `<div class="stage wipe-stage" id="wipeStage" role="slider" tabindex="0" aria-label="Wipe position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+        <video id="cmpA" src="${src(S.cmp.left)}" preload="auto" playsinline></video><video id="cmpB" src="${src(S.cmp.right)}" preload="auto" playsinline></video>
+        <div class="wipe-line"></div><span class="wipe-tag" style="left:8px">${esc(cmpLabel(S.cmp.left))}</span><span class="wipe-tag" style="right:8px">${esc(cmpLabel(S.cmp.right))}</span></div>`
+    : `<div class="compare"><div class="side"><div class="stage"><video id="cmpA" src="${src(S.cmp.left)}" preload="auto" playsinline></video><span class="wipe-tag" style="left:8px">${esc(cmpLabel(S.cmp.left))}</span></div></div>
+        <div class="side"><div class="stage"><video id="cmpB" src="${src(S.cmp.right)}" preload="auto" playsinline></video><span class="wipe-tag" style="left:8px">${esc(cmpLabel(S.cmp.right))}</span></div></div></div>`;
+  return `${head}${stage}
+    <div class="transport"><button class="primary" id="cmpPlay">${icon("play", "fill")} Play both</button><span class="readout" id="cmpReadout"></span><span class="spacer"></span>
+      <span class="small" id="audioLabel">Sound from</span><button class="pill" data-audio="left" aria-pressed="${S.cmpAudio === "left"}">Left</button><button class="pill" data-audio="right" aria-pressed="${S.cmpAudio === "right"}">Right</button></div>
+    <div class="slider-plain" id="cmpTl" role="slider" tabindex="0" aria-label="Playhead" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="fill" id="cmpFill"></div></div>`;
+}
+const applyCmpAudio = () => { const a = $("cmpA"), b = $("cmpB"); if (!a) return; a.muted = S.cmpAudio !== "left"; b.muted = S.cmpAudio !== "right"; document.querySelectorAll("[data-audio]").forEach((x) => x.setAttribute("aria-pressed", x.dataset.audio === S.cmpAudio)); };
+function cmpToggle() { const a = $("cmpA"), b = $("cmpB"); if (!a) return; if (a.paused) { b.currentTime = a.currentTime; a.play().catch(() => {}); b.play().catch(() => {}); } else { a.pause(); b.pause(); } }
+function wireCompare() {
+  const a = $("cmpA"), b = $("cmpB"), tl = $("cmpTl"); applyCmpAudio();
+  let raf = 0;
+  const sync = () => {
+    if (Math.abs(b.currentTime - a.currentTime) > 0.08) b.currentTime = a.currentTime;
+    const dur = a.duration || 1; $("cmpFill").style.width = `${(a.currentTime / dur) * 100}%`; tl.setAttribute("aria-valuenow", Math.round((a.currentTime / dur) * 100)); tl.setAttribute("aria-valuetext", spoken(a.currentTime));
+    $("cmpReadout").textContent = `${fmt(a.currentTime)} / ${fmt(dur)}`; $("cmpPlay").innerHTML = a.paused ? `${icon("play", "fill")} Play both` : `${icon("pause", "fill")} Pause both`;
+    if (!a.paused) raf = requestAnimationFrame(sync);
+  };
+  a.addEventListener("seeked", sync); a.addEventListener("pause", () => { b.pause(); cancelAnimationFrame(raf); sync(); }); a.addEventListener("play", () => { b.play().catch(() => {}); sync(); });
+  a.addEventListener("loadedmetadata", sync);
+  const go = (e) => { const r = tl.getBoundingClientRect(); a.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * (a.duration || 0); b.currentTime = a.currentTime; };
+  tl.onpointerdown = (e) => { a.pause(); go(e); tl.setPointerCapture(e.pointerId); tl.onpointermove = go; };
+  tl.onpointerup = () => { tl.onpointermove = null; };
+  const w = $("wipeStage");
+  if (w) {
+    const set = (pc) => { pc = Math.max(0, Math.min(100, pc)); w.style.setProperty("--split", `${pc}%`); w.setAttribute("aria-valuenow", Math.round(pc)); };
+    const move = (e) => { const r = w.getBoundingClientRect(); set(((e.clientX - r.left) / r.width) * 100); };
+    w.onpointerdown = (e) => { move(e); w.setPointerCapture(e.pointerId); w.onpointermove = move; };
+    w.onpointerup = () => { w.onpointermove = null; };
+    w.onkeydown = (e) => { const now = Number(w.getAttribute("aria-valuenow")); if (e.key === "ArrowLeft") { set(now - 5); e.preventDefault(); e.stopPropagation(); } if (e.key === "ArrowRight") { set(now + 5); e.preventDefault(); e.stopPropagation(); } };
+  }
+  document.querySelectorAll("[data-side]").forEach((s) => { s.onchange = () => { S.cmp[s.dataset.side] = s.value; renderStage(); }; });
+}
+
+// ---------- right panel ----------
+const SKELETON = `<div style="padding:8px 10px" aria-busy="true"><span class="sr">Loading</span>${[82, 64, 74, 52, 68].map((w) => `<div class="sk sk-line" style="width:${w}%"></div>`).join("")}</div>`;
+const TABS = [["notes", "Notes"], ["script", "Script"], ["changes", "Changes"], ["checks", "Checks"]];
+function showTab(id, focus) {
+  S.tab = id; localSet("tab", id); S.scriptNow = null;
+  for (const [k] of TABS) { $(`tab-${k}`).hidden = k !== id; }
+  renderTabs(); renderPanelBody();
+  if (focus) $(`tabbtn-${id}`)?.focus();
+}
+function renderTabs() {
+  const h = curHook(), f = S.insight?.findings ?? [], counts = { notes: h ? h.notes.filter((n) => n.status === "open").length : 0, changes: S.insight?.changes?.length ?? 0, checks: f.filter((x) => x.level !== "info").length };
+  keepFocus($("tabs"), TABS.map(([k, l]) => `<button role="tab" data-k="tab-${k}" id="tabbtn-${k}" data-tab="${k}" aria-selected="${S.tab === k}" aria-controls="tab-${k}" tabindex="${S.tab === k ? 0 : -1}">${l}${counts[k] ? ` <span class="n">${counts[k]}</span>` : ""}</button>`).join("") + `<span class="tab-ink" id="tabInk" style="transform:translateX(${S.inkX ?? 0}px);width:${S.inkW ?? 0}px"></span>`);
+  // the underline travels from the old tab to the new one
+  requestAnimationFrame(() => { const b = $(`tabbtn-${S.tab}`), ink = $("tabInk"); if (!b || !ink) return; const x = b.offsetLeft + 10, w = b.offsetWidth - 20; ink.style.transform = `translateX(${x}px)`; ink.style.width = `${w}px`; S.inkX = x; S.inkW = w; });
+}
+$("tabs").onclick = (e) => { const b = e.target.closest("[data-tab]"); if (b) showTab(b.dataset.tab); };
+$("tabs").onkeydown = (e) => {
+  const i = TABS.findIndex(([k]) => k === S.tab);
+  if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); e.stopPropagation(); showTab(TABS[(i + (e.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length][0], true); }
+};
+function renderPanel() { for (const [k] of TABS) $(`tab-${k}`).hidden = k !== S.tab; renderTabs(); renderPanelBody(); }
+function renderPanelBody() {
+  if (S.tab === "notes") renderNotes();
+  if (S.tab === "script") renderScript();
+  if (S.tab === "changes") renderChanges();
+  if (S.tab === "checks") renderChecks();
+}
+
+// ---------- notes ----------
+function renderCats() { keepFocus($("cats"), CATS.map((c) => `<button type="button" data-k="cat-${c}" data-cat="${esc(c)}" aria-pressed="${S.cat === c}">${esc(c)}</button>`).join("")); }
+const whenText = () => S.rin != null ? `${fmt(Math.min(S.rin, S.rout ?? S.pin))} – ${fmt(Math.max(S.rin, S.rout ?? S.pin))}` : fmt(S.pin);
+function updateWhen() {
+  const w = $("whenLabel"); if (w) w.textContent = whenText();
+  $("rangeClear").hidden = S.rin == null;
+  const shot = plan()?.visible.find((s) => S.pin >= s.start && S.pin < s.end);
+  const ctx = shot ? `on ${shot.label}` : "";
+  if ($("whenCtx").textContent !== ctx) $("whenCtx").textContent = ctx;
+}
+const draftKey = () => `draft.${S.pid}.${S.cut}`;
+function loadDraft() { const k = draftKey(); if (S.draftKey === k) return; S.draftKey = k; const t = $("noteText"); t.value = localGet(k, ""); $("saveBtn").disabled = !t.value.trim(); $("composer").classList.toggle("open", !!t.value.trim()); }
+function noteHtml(n) {
+  const range = n.timestamp_end != null && n.timestamp_end > n.timestamp_start, ctx = n.context, id = esc(n.id);
+  const edit = S.editing === n.id, active = S.activeNote === n.id;
+  const details = [n.version !== S.version ? esc(editOfId(n.version) === editOfId(S.version) ? vname(n.version) : vfull(n.version)) : "", n.resolved_in_version ? `fixed in ${esc(vname(n.resolved_in_version))}` : "", n.category ? esc(n.category) : "", ctx?.shot && ctx.shot.id !== "host" ? `on ${esc(ctx.shot.label)}` : ""].filter(Boolean).join(" · ");
+  return `<li class="note ${n.status} ${active ? "active" : ""} ${S.nowNote === n.id ? "now" : ""}" data-id="${id}">
+    <button class="ts" data-k="ts-${id}" data-seek="${n.timestamp_start}" aria-label="Go to ${fmt(n.timestamp_start)}">${fmt(n.timestamp_start)}${range ? `–${fmt(n.timestamp_end)}` : ""}</button>
+    ${edit ? `<div><label class="sr" for="edit-${id}">Edit note</label><textarea id="edit-${id}" class="edit-box">${esc(n.text)}</textarea><div class="small" style="margin-top:4px">Enter saves · Esc cancels</div></div>` : `<div class="text">${n.standing_rule ? `<span class="star" title="Standing rule">${icon("star", "fill")}<span class="sr">Standing rule. </span></span>` : ""}${n.drawing ? `<span class="ink-tag" title="Has a drawing: pause on it to see it">${icon("pencil")}<span class="sr">Has a drawing. </span></span>` : ""}${esc(n.text)}</div>`}
+    ${edit ? "" : `<span class="acts">
+        <button data-k="edit-${id}" data-act="edit" aria-label="Edit note" title="Edit">${icon("pencil")}</button>
+        <button data-k="done-${id}" data-act="done" aria-label="${n.status === "done" ? "Reopen note" : "Mark note done"}" title="${n.status === "done" ? "Reopen" : "Mark done"}">${icon(n.status === "done" ? "rotate-ccw" : "check")}</button>
+        <button data-k="del-${id}" data-act="del" aria-label="Delete note" title="Delete">${icon("x")}</button></span>`}
+    ${active && !edit ? `<div class="nmeta">
+      ${details ? `<div class="small">${details}</div>` : ""}
+      ${ctx?.said ? `<div class="small">“${esc(ctx.said)}”</div>` : ""}
+      ${n.generalized_rule ? `<div class="rule">Rule: ${esc(n.generalized_rule)}</div>` : `<button class="rulebtn" data-k="rule-${id}" data-act="rule" aria-pressed="${!!n.standing_rule}">${icon("star", n.standing_rule ? "fill" : "")} ${n.standing_rule ? "Standing rule" : "Make it a standing rule"}</button>`}
+    </div>` : ""}
+  </li>`;
+}
+// new rows open up and push the others down, instead of the list jumping
+function growIn(el) { if (calm()) return; const h = el.offsetHeight; el.animate([{ height: "0px", opacity: 0, paddingBlock: "0px" }, { height: `${h}px`, opacity: 1 }], { duration: 180, easing: "cubic-bezier(.2,.8,.2,1)" }); }
+// never waits on the animation alone: a background tab doesn't run it, and the delete must still happen
+function shrinkOut(el) { if (calm()) return Promise.resolve(); el.style.overflow = "hidden"; el.animate([{ height: `${el.offsetHeight}px`, opacity: 1 }, { height: "0px", opacity: 0, paddingBlock: "0px" }], { duration: 150, easing: "ease-in", fill: "forwards" }); return new Promise((ok) => setTimeout(ok, 150)); }
+function renderNotes() {
+  const h = curHook();
+  if (!h) { $("noteList").innerHTML = ""; $("noteCount").textContent = ""; return; }
+  loadDraft(); renderCats();
+  const open = h.notes.filter((n) => n.status === "open").length, done = h.notes.length - open;
+  const list = h.notes.filter((n) => S.showDone || n.status === "open").sort((a, b) => a.timestamp_start - b.timestamp_start);
+  $("showDone").checked = S.showDone;
+  $("noteCount").textContent = `Show ${done} done`; $("doneRow").hidden = !done;
+  $("copyNotes").disabled = !open;
+  const key = `${S.pid}|${S.cut}`, before = S.noteKey === key ? S.noteIds : null;
+  keepFocus($("noteList"), list.length ? list.map(noteHtml).join("") : `<li class="empty">${h.notes.length && !S.showDone ? "Every note is done." : "Nothing to fix yet."}<br/>Press <kbd>N</kbd> at the moment you want changed.</li>`);
+  if (before) $("noteList").querySelectorAll(".note").forEach((el) => { if (!before.has(el.dataset.id)) growIn(el); });
+  S.noteKey = key; S.noteIds = new Set(list.map((n) => n.id));
+  updateWhen();
+  const box = $("noteList").querySelector(".edit-box");
+  if (box) { box.focus(); box.setSelectionRange(box.value.length, box.value.length); box.onkeydown = (e) => { e.stopPropagation(); if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); saveEdit(box); } if (e.key === "Escape") { S.editing = null; renderNotes(); } }; }
+}
+async function saveEdit(box) {
+  const id = S.editing, text = box.value.trim(); if (!text) return;
+  try { S.doc = await api(`/api/projects/${S.pid}/hooks/${S.cut}/notes/${id}`, { method: "PATCH", body: { text } }); S.editing = null; syncDoc(); } catch (e) { fail(e); }
+}
+function jumpToNote(id) {
+  const h = curHook(), n = h.notes.find((x) => x.id === id); if (!n) return;
+  if (S.tab !== "notes") showTab("notes");
+  S.activeNote = id;
+  if (n.version !== S.version && h.versions.some((v) => v.version === n.version)) { const keep = S.seekTo; S.version = n.version; S.seekTo = n.timestamp_start; void keep; S.flip = snapshotFrame(); S.insight = null; updateHash(); renderAll(); loadInsight(); return; }
+  seek(n.timestamp_start);
+  renderNotes();
+  $("noteList").querySelector(`[data-id="${CSS.escape(id)}"]`)?.scrollIntoView({ block: "nearest" });
+}
+$("noteList").addEventListener("click", async (e) => {
+  const t = e.target.closest("[data-seek],[data-act]"); if (!t) return;
+  const id = t.closest(".note")?.dataset.id, n = curHook().notes.find((x) => x.id === id), base = `/api/projects/${S.pid}/hooks/${S.cut}/notes/${id}`;
+  try {
+    if (t.dataset.seek != null) { jumpToNote(id); return; }
+    if (t.dataset.act === "edit") { S.editing = S.editing === id ? null : id; renderNotes(); return; }
+    if (t.dataset.act === "done") S.doc = await api(base, { method: "PATCH", body: { status: n.status === "done" ? "open" : "done" } });
+    if (t.dataset.act === "del") {
+      await shrinkOut(t.closest(".note"));
+      S.doc = await api(base, { method: "DELETE" });
+      toast("Note deleted", { label: "Undo", run: () => api(`/api/projects/${S.pid}/hooks/${S.cut}/notes`, { method: "POST", body: n }).then((d) => { S.doc = d; syncDoc(); }).catch(fail) });
+    }
+    if (t.dataset.act === "rule") S.doc = await api(base, { method: "PATCH", body: { standing_rule: !n.standing_rule } });
+    syncDoc();
+  } catch (err) { fail(err); }
+});
+$("cats").onclick = (e) => { const b = e.target.closest("[data-cat]"); if (!b) return; S.cat = S.cat === b.dataset.cat ? null : b.dataset.cat; renderCats(); };
+$("showDone").onchange = (e) => { S.showDone = e.target.checked; localSet("showDone", S.showDone); renderNotes(); renderTimeline(); };
+$("drawNote").onclick = () => setDraw(!S.draw.on);
+$("rangeIn").onclick = () => setIn(); $("rangeOut").onclick = () => setOut(); $("rangeClear").onclick = () => clearRange();
+function setIn() { const p = vid(); if (!p) return; S.rin = p.currentTime; S.rout = null; S.pin = p.currentTime; paint(); updateWhen(); }
+function setOut() { const p = vid(); if (!p) return; if (S.rin == null) S.rin = 0; S.rout = p.currentTime; paint(); updateWhen(); }
+function clearRange() { S.rin = S.rout = null; S.loop = false; $("loopBtn")?.setAttribute("aria-pressed", false); paint(); updateWhen(); }
+const ta = $("noteText");
+// focusing the note box freezes the picture and the timestamp, so the note lands on the frame being looked at
+ta.onfocus = () => { S.composing = true; $("composer").classList.add("open"); const p = vid(); if (p && !p.paused) p.pause(); if (p) S.pin = p.currentTime; updateWhen(); };
+ta.onblur = () => { S.composing = false; };
+// the form folds back to one line when it's empty and focus has left it
+$("composer").addEventListener("focusout", (e) => { if (!$("composer").contains(e.relatedTarget) && !ta.value.trim() && S.rin == null && !S.cat && !S.draw.strokes.length) $("composer").classList.remove("open"); });
+ta.oninput = () => { $("saveBtn").disabled = !ta.value.trim() && !S.draw.strokes.length; localSet(draftKey(), ta.value); };
+ta.onkeydown = (e) => { e.stopPropagation(); if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); saveNote(); } if (e.key === "Escape") { ta.blur(); $("tracks")?.focus(); } };
+$("composer").onsubmit = (e) => { e.preventDefault(); saveNote(); };
+function pinHere() { showTab("notes"); ta.focus(); }
+async function saveNote() {
+  const strokes = S.draw.strokes, text = ta.value.trim() || (strokes.length ? "See drawing" : ""); if (!text || !S.version) return;
+  const a = S.rin != null ? Math.min(S.rin, S.rout ?? S.pin) : S.pin, b = S.rin != null ? Math.max(S.rin, S.rout ?? S.pin) : null;
+  try {
+    S.doc = await api(`/api/projects/${S.pid}/hooks/${S.cut}/notes`, { method: "POST", body: { version: S.version, timestamp_start: Math.round(a * 1000) / 1000, timestamp_end: b != null ? Math.round(b * 1000) / 1000 : null, text, category: S.cat, standing_rule: $("ruleChk").checked, ...(strokes.length ? { drawing: { strokes }, frame_jpeg: inkFrame(strokes) } : {}) } });
+    S.draw.strokes = []; if (S.draw.on) setDraw(false); renderInk(); renderInkbar();
+    ta.value = ""; localSet(draftKey(), ""); $("saveBtn").disabled = true; S.cat = null; $("ruleChk").checked = false; S.rin = S.rout = null; S.loop = false; ta.placeholder = "Add a note"; $("composer").classList.remove("open");
+    toast("Note saved"); syncDoc(); ta.blur(); $("tracks")?.focus();
+  } catch (e) { fail(e); }
+}
+$("copyNotes").onclick = async () => {
+  const h = curHook(), lines = h.notes.filter((n) => n.status === "open").sort((a, b) => a.timestamp_start - b.timestamp_start).map((n) => `- ${fmt(n.timestamp_start)}${n.timestamp_end ? `–${fmt(n.timestamp_end)}` : ""} (${vfull(n.version)}): ${n.text}`);
+  try { await navigator.clipboard.writeText(`${S.doc.title} · ${h.label} ${vfull(S.version)}\n${lines.join("\n")}`); toast(`Copied ${plural(lines.length, "note")}`); } catch { toast("Couldn't reach the clipboard"); }
+};
+
+// ---------- script ----------
+function renderScript() {
+  const words = S.insight?.words ?? [], box = $("script");
+  if (!S.insight) { box.innerHTML = `${curVer() ? SKELETON : `<div class="empty">Nothing to show until the first render.</div>`}`; return; }
+  if (!words.length) { box.innerHTML = `<div class="empty">No transcript found for this cut. Keep Parakeet transcripts in <code>transcripts/</code>, or set <code>"transcript"</code> in the config.</div>`; return; }
+  box.innerHTML = `<p class="small" style="margin:0 0 8px">Auto-transcribed, so names can be misheard. Click any word to jump to it.</p>` + words.map((w, i) => `${i && w.start - words[i - 1].end > 0.5 ? `<span class="gap"></span>` : ""}<button data-i="${i}" data-t="${w.start}" title="${fmt(w.start)}">${esc(w.text)}</button>`).join(" ");
+  S.scriptNow = null; paintSpoken(vid()?.currentTime ?? 0);
+}
+$("script").onclick = (e) => { const b = e.target.closest("[data-t]"); if (b) seek(Number(b.dataset.t)); };
+
+// ---------- changes ----------
+const CHANGE_LABEL = { title: "Title", broll: "B-roll", camera: "Camera", audio: "Audio", timing: "Timing" };
+function renderChanges() {
+  const box = $("changes"), ins = S.insight;
+  if (!ins) { box.innerHTML = `${curVer() ? SKELETON : `<div class="empty">Nothing to show until the first render.</div>`}`; return; }
+  if (!ins.previous) { box.innerHTML = `<div class="empty">${esc(vname(S.version))} is the first version of ${editOfId(S.version) > 1 ? "this edit" : "this cut"}.</div>`; return; }
+  const list = ins.changes ?? [];
+  box.innerHTML = `<p class="small" style="margin:4px 6px">What the edit changed from ${esc(vfull(ins.previous))} to ${esc(vfull(S.version))}, read from the two configs. Replaced B-roll files with the same name won't show here.</p>` +
+    (list.length ? list.map((c) => `<div class="card"><div class="top">${c.t != null ? `<button class="ts" data-t="${c.t}" aria-label="Go to ${fmt(c.t)}">${fmt(c.t)}</button>` : ""}<span class="tag">${CHANGE_LABEL[c.type] ?? esc(c.type)}</span></div><div class="text">${esc(c.text)}</div></div>`).join("") : `<div class="empty">No config changes. Any difference is in a B-roll file.</div>`);
+}
+$("changes").onclick = (e) => { const b = e.target.closest("[data-t]"); if (b) seek(Number(b.dataset.t)); };
+
+// ---------- checks ----------
+const LVL = { error: "Must fix", warn: "Worth a look", info: "FYI" };
+function renderChecks() {
+  const box = $("checks"), ins = S.insight, v = curVer();
+  if (!ins) { box.innerHTML = `${curVer() ? SKELETON : `<div class="empty">Nothing to show until the first render.</div>`}`; return; }
+  const f = ins.findings ?? [], qa = v?.qa;
+  const qaHtml = qa ? `<div class="card lead"><div class="top"><span class="dot ${qa.pass ? "green" : "yellow"}"></span><b>Render QA ${qa.pass ? "passed" : `flagged ${qa.issues.length}`}</b></div>
+    ${qa.issues?.length ? `<ul style="margin:0;padding-left:18px">${qa.issues.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>` : ""}
+    <dl class="kv"><dt>Loudness</dt><dd>${qa.loudness?.lufs ?? "?"} LUFS</dd><dt>True peak</dt><dd>${qa.loudness?.true_peak ?? "?"} dBTP</dd><dt>Length</dt><dd>${v.duration_sec}s</dd></dl></div>` : `<div class="card small">This version has no QA report.</div>`;
+  box.innerHTML = `${qaHtml}<div class="section">House rules</div>` +
+    (f.length ? f.map((x, i) => `<div class="card finding ${x.level}"><div class="top">${x.t != null ? `<button class="ts" data-t="${x.t}" aria-label="Go to ${fmt(x.t)}">${fmt(x.t)}</button>` : ""}<span class="lvl">${LVL[x.level]}</span><span class="acts"><button class="textbtn" data-note-from="${i}" title="Turn this into a note for Claude to apply">Add note</button></span></div><div class="text">${esc(x.message)}</div></div>`).join("") : `<div class="empty">Every house-rule check passes.</div>`) +
+    `<p class="small" style="margin:6px">Checks run on the config, so they catch timing and text but can't judge how a shot looks. Watch it too.</p>`;
+}
+$("checks").onclick = async (e) => {
+  const s = e.target.closest("[data-t]"); if (s) { seek(Number(s.dataset.t)); return; }
+  const b = e.target.closest("[data-note-from]"); if (!b) return;
+  const f = S.insight.findings[Number(b.dataset.noteFrom)];
+  try {
+    S.doc = await api(`/api/projects/${S.pid}/hooks/${S.cut}/notes`, { method: "POST", body: { version: S.version, timestamp_start: f.t ?? 0, timestamp_end: f.end ?? null, text: f.message, source: `lint:${f.rule}` } });
+    toast("Added as a note"); syncDoc();
+  } catch (err) { fail(err); }
+};
+
+// ---------- deep links ----------
+function readHash() { const q = new URLSearchParams(location.hash.slice(1)); return { p: q.get("p"), c: q.get("c"), v: q.get("v"), t: q.has("t") ? Number(q.get("t")) : null }; }
+function updateHash() { if (!S.pid) return; const q = new URLSearchParams({ p: S.pid, c: S.cut ?? "", v: S.version ?? "" }); const t = S.seekTo ?? vid()?.currentTime; if (t) q.set("t", t.toFixed(1)); history.replaceState(null, "", `#${q}`); }
+
+// ---------- keyboard ----------
+document.addEventListener("keydown", (e) => {
+  if (S.draw.on && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z" && !e.target.closest?.("textarea, input")) { e.preventDefault(); inkUndo(); return; }
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (document.querySelector("dialog[open]") || !$("menu").hidden) return;
+  const target = e.target;
+  if (target.closest?.("textarea, input, select")) return;
+  const onButton = target.closest?.("button, a");
+  if (e.key === "?") { e.preventDefault(); $("helpDlg").showModal(); return; }
+  const p = S.compare ? $("cmpA") : vid(); if (!p) return;
+  const fps = S.doc?.fps || 24;
+  const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  const stop = () => e.preventDefault();
+  if (e.code === "Space") { if (onButton) return; stop(); togglePlay(); }
+  else if (key === "k") { stop(); togglePlay(); }
+  else if (key === "ArrowLeft" || key === "ArrowRight") { if (target.closest?.('[role="tablist"]')) return; stop(); step((key === "ArrowLeft" ? -1 : 1) * (e.shiftKey ? 1 : 1 / fps)); }
+  else if (key === "j") { stop(); step(-1); }
+  else if (key === "l") { stop(); step(1); }
+  else if (e.code === "Comma" || e.code === "Period") { stop(); step((e.code === "Comma" ? -1 : 1) * (e.shiftKey ? 1 : 0.1)); }
+  else if (key === "Home") { stop(); p.pause(); p.currentTime = 0; }
+  else if (key === "End") { stop(); p.pause(); p.currentTime = Math.max(0, (p.duration || 0) - 1 / fps); }
+  else if (key === "ArrowUp" || key === "ArrowDown") {
+    const cuts = (plan()?.visible ?? []).map((s) => s.start); if (!cuts.length || S.compare) return; stop();
+    const t = p.currentTime, to = key === "ArrowDown" ? cuts.find((c) => c > t + 0.02) : [...cuts].reverse().find((c) => c < t - 0.02);
+    // land inside the first frame of the shot, not on the boundary, where the previous frame would still show
+    if (to != null) seek((Math.ceil(to * fps - 1e-6) + 0.5) / fps);
+  }
+  else if (key === "[" || key === "]") {
+    const list = curHook().notes.filter((n) => S.showDone || n.status === "open").sort((a, b) => a.timestamp_start - b.timestamp_start); if (!list.length || S.compare) return; stop();
+    const t = p.currentTime, n = key === "]" ? list.find((x) => x.timestamp_start > t + 0.02) ?? list[0] : [...list].reverse().find((x) => x.timestamp_start < t - 0.02) ?? list.at(-1);
+    jumpToNote(n.id);
+  }
+  else if (S.compare) { if (key === "c") { stop(); toggleCompare(); } }
+  else if (key === "n") { stop(); if (S.draw.on) setDraw(false); pinHere(); }
+  else if (key === "d") { stop(); setDraw(!S.draw.on); }
+  else if (key === "Escape" && S.draw.on) { stop(); setDraw(false); }
+  else if (key === "i") { stop(); setIn(); }
+  else if (key === "o") { stop(); setOut(); }
+  else if (key === "x") { stop(); clearRange(); }
+  else if (key === "r") { stop(); toggleLoop(); }
+  else if (key === "g") { stop(); toggleGuides(); }
+  else if (key === "m") { stop(); toggleMute(); }
+  else if (key === "f") { stop(); $("stage")?.requestFullscreen?.(); }
+  else if (key === "c") { stop(); toggleCompare(); }
+  else if (key === "=" || key === "+") { stop(); setZoom(S.zoom * 1.5); }
+  else if (key === "-") { stop(); setZoom(S.zoom / 1.5); }
+});
+$("helpClose").onclick = () => $("helpDlg").close();
+
+// ---------- live updates ----------
+function connect() {
+  const es = new EventSource("/api/events");
+  es.onopen = () => { if (S.lost) { S.lost = false; $("conn").textContent = ""; refresh().catch(() => {}); } };
+  es.onerror = () => { S.lost = true; $("conn").textContent = "Reconnecting to the server…"; };
+  es.onmessage = async (m) => {
+    const ev = JSON.parse(m.data);
+    if (ev.type === "log" && ev.project === S.pid) { S.log.push(ev.line); if (S.doc?.job) S.doc.job.running = true; renderBanners(); }
+    if (ev.type === "media") { const v = curVer(); if (v?.video_path === ev.video) loadInsight(); }
+    if (ev.type === "applied" && ev.project === S.pid) { toast(ev.newVersion ? `${vname(ev.newVersion)} is ready` : ev.authError ? "Claude needs you to sign in" : "Apply notes finished"); await refresh().catch(fail); }
+    if (ev.type === "changed") await refresh().catch(() => {});
+    if (ev.type === "app") {
+      // the page itself was updated: reload, unless that would lose a note being written or a drawing
+      if (S.appVersion && S.appVersion !== ev.version) { if (!$("noteText").value.trim() && !S.draw.strokes.length) location.reload(); else toast("The review app was updated", { label: "Reload", run: () => location.reload() }); }
+      S.appVersion = ev.version;
+    }
+  };
+}
+async function refresh() {
+  S.projects = await api("/api/projects"); renderShell();
+  if (!S.pid) { if (S.projects.length) await loadProjects(); return; }
+  const prevHook = curHook(), prevLatest = prevHook ? latest(prevHook) : null;
+  const d = await api(`/api/projects/${S.pid}`), h = d.hooks[S.cut];
+  S.doc = d; if (d.job) S.log = d.job.log;
+  if (!h) return openProject(S.pid, true);
+  const grew = latest(h) !== prevLatest;
+  if (grew || !S.version) {
+    // never pull the version out from under someone watching or mid-note: the note would land on the wrong one
+    const p = vid(), busy = (p && !p.paused) || S.composing || document.activeElement === $("noteText") || !!$("noteText").value.trim();
+    if (!busy || !S.version) { S.version = latest(h); S.insight = null; renderAll(); loadInsight(); if (grew && prevLatest) toast(`${vname(latest(h))} is here`); renderBanners(); return; }
+    toast(`${vname(latest(h))} is ready`, { label: "Open", run: () => selectVersion(latest(h)) });
+  }
+  renderToolbar(); renderBanners(); renderTimelineIfIdle(); renderPanel();
+}
+// the timeline re-renders from scratch, so hold off while someone is dragging on it
+const renderTimelineIfIdle = () => { if (!$("tracks")?.onpointermove) renderTimeline(); };
+
+connect();
+loadProjects().catch(fail);
+
+// hover tooltips: every control's title becomes a quick styled tip (name, shortcut, and a line on what it does).
+// The native title is moved to data-tip so the browser's slow one doesn't double up.
+(() => {
+  const tip = $("tip"); let cur = null, timer = 0, warmUntil = 0;
+  const target = (el) => el?.closest?.("[title],[data-tip]");
+  function show(el) {
+    if (el.hasAttribute("title")) { el.dataset.tip = el.title; el.removeAttribute("title"); }
+    const m = /^(.*?)\s*\(([^)]+)\)$/.exec(el.dataset.tip ?? ""), name = m ? m[1] : el.dataset.tip, key = m?.[2];
+    if (!name) return;
+    tip.innerHTML = `<b>${esc(name)}</b>${key ? `<kbd>${esc(key)}</kbd>` : ""}${el.dataset.desc ? `<p>${esc(el.dataset.desc)}</p>` : ""}`;
+    tip.hidden = false;
+    const r = el.getBoundingClientRect(), t = tip.getBoundingClientRect();
+    let top = r.top - t.height - 8; if (top < 8) top = r.bottom + 8;
+    tip.style.left = `${Math.max(8, Math.min(innerWidth - t.width - 8, r.left + r.width / 2 - t.width / 2))}px`; tip.style.top = `${top}px`;
+    requestAnimationFrame(() => tip.classList.add("on"));
+  }
+  function hide() { clearTimeout(timer); if (cur) warmUntil = Date.now() + 400; cur = null; tip.classList.remove("on"); tip.hidden = true; }
+  function enter(el) {
+    if (el === cur) return; hide(); cur = el;
+    // the first tip waits a beat so sweeping the mouse across the bar stays quiet; neighbours then show at once
+    timer = setTimeout(() => cur === el && el.isConnected && show(el), Date.now() < warmUntil ? 0 : 350);
+  }
+  document.addEventListener("pointerover", (e) => { if (e.pointerType === "touch") return; const el = target(e.target); el ? enter(el) : hide(); });
+  document.addEventListener("pointerout", (e) => { if (cur && !cur.contains(e.relatedTarget)) hide(); });
+  document.addEventListener("focusin", (e) => { const el = target(e.target); if (el && e.target.matches(":focus-visible")) enter(el); });
+  document.addEventListener("focusout", hide);
+  for (const ev of ["pointerdown", "scroll", "wheel"]) document.addEventListener(ev, hide, { capture: true, passive: true });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") hide(); });
+})();
+</script>
+</body>
+</html>

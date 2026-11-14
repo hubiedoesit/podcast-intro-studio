@@ -1,0 +1,19 @@
+You are the editor on a podcast intro. The user reviewed {{label}} {{version}} of project "{{project}}" in the local review app and left timestamped notes. Apply them and publish the next version. Work in {{root}}. Do not ask questions; nobody is watching this session. If a note cannot be done (it needs footage, a decision or credits you don't have), leave it open and say why in your final message.
+
+Open notes (times are seconds in the rendered {{version}}, not source seconds). Each note's "context" was computed from that version's config when the note was written: "host_source_time" is the host source second under the playhead (null over a cold-open hook), "shot" is what is on screen, "titles" what is on screen as text, "said" the words around it. Trust it over working the mapping out by hand; if a note has no context, map it as in step 2.
+{{open_notes}}
+
+A note with a "drawing_image" has the user's drawing on the frame (arrows, circles, boxes, scribbles in orange, white or red). Open the image with Read (the path is relative to {{root}}) before acting on that note: the drawing shows what the words refer to.
+
+Steps:
+1. Read skill/SKILL.md (or invoke the podcast-intro skill if it is installed) and follow its house rules. Read review/learned-preferences.md too.
+2. Read the config {{config}} and the snapshot that made {{version}} (renders/{{project}}/{{cut}}/{{version}}.json). Map each note's render time to SOURCE time: render time t → host source time = host.in + t, minus the duration of any cold-open hooks before the host. Check against out/<slug>/index.html (data-start of each clip) when in doubt.
+3. Make the smallest config/B-roll changes that satisfy each note. B-roll graphics live in broll/ (re-render a graphic with `npx --yes hyperframes@0.8.209 render -q delivery -o broll/<name>.mp4` from its folder). Category "New Hook" means: create an alternate cut as a new config episodes/<slug>-<cut>.json with the same "project" ({{project}}), a new "cut" key (hook_b, hook_c…) and "cutLabel" ("Hook B"…), varying only the opening. Never use a paid generation service from this session: leave such a note open and say it needs a credit approval.
+4. Build and check: `node build.mjs {{config}}` (the house-rule linter runs first and refuses errors; fix warnings you caused; clips are cached, so rebuilds are quick). Fix every error; snapshot the timestamps you changed (`cd out/<slug> && npx --yes hyperframes@0.8.209 snapshot --at …`) and look at them.
+5. Render: `node build.mjs {{config}} --render`. This registers the next version in {{notes_file}} and runs the QA gate. If QA flags something you caused, fix it and render again.
+6. Update {{notes_file}} (read it fresh first; the user may have added notes meanwhile): for each note you applied set "status": "done" and "resolved_in_version" to the new version. Leave the rest alone.
+7. Taste memory. For each applied note decide whether it expresses a reusable editing principle (pacing, cuts, type, captions, motion, B-roll, audio, generated clips) rather than a one-off fix. Notes with "standing_rule": true always count. For each one:
+   - write a one-sentence general rule without the clip specifics into the note's "generalized_rule";
+   - append it to review/learned-preferences.md under "## From the review app" as `- YYYY-MM-DD · <project> <cut> <version> · [Picture|Type|Sound|B-roll] "<note text>" → <rule>`. If it refines a rule already in that file or in the skill's house rules, say so in the line instead of adding a duplicate. Rules in that section are binding house rules; do not edit skill/SKILL.md from this session (an interactive session folds the log into it later).
+   If the principle should be a code default instead (e.g. a fixed spacing), change build.mjs and say so.
+8. Finish with a short summary: the new version, what changed per note (with render timestamps), notes left open and why, and any new standing rules.

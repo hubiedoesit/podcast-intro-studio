@@ -1,0 +1,18 @@
+{
+  "name": "podcast-intro-studio",
+  "version": "0.1.0",
+  "description": "Cut podcast episode intros from a raw host recording with a JSON edit, HyperFrames and a local review app. Ships with a Claude Code skill.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "review": "node review/server.mjs",
+    "demo": "node tools/demo.mjs",
+    "test": "node --test test/*.test.mjs",
+    "lint": "node tools/lint.mjs",
+    "doctor": "node tools/doctor.mjs",
+    "new": "node tools/new-episode.mjs",
+    "opener": "node tools/make-opener.mjs"
+  }
+}

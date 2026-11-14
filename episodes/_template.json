@@ -1,0 +1,88 @@
+{
+  "_notes": "Usually written by tools/new-episode.mjs; otherwise copy to episodes/<yyyymmdd>-<host>-<topic>.json. All times are SOURCE seconds from the transcript. House defaults (grade, crop, B-roll grain/halftone, voice levelling, no SFX on text) are built in; see skill/SKILL.md.",
+  "slug": "YYYYMMDD-host-topic",
+  "title": "Episode Title",
+  "guest": {
+    "name": "Guest Name",
+    "role": "Role, Company"
+  },
+  "sources": {
+    "host": "/path/to/host-recording.mp4"
+  },
+  "sideWidth": 540,
+  "hooks": [],
+  "host": {
+    "src": "host",
+    "in": 0.0,
+    "out": 0.0,
+    "tail": 1.5,
+    "frame": {
+      "scale": 1.1,
+      "center": [
+        960,
+        450
+      ]
+    },
+    "zoom": {
+      "scale": 1.37,
+      "origin": [
+        857,
+        642
+      ],
+      "until": 0.0
+    },
+    "moves": [
+      {
+        "at": 0.0,
+        "scale": 1.0,
+        "to": 1.08,
+        "dur": 1.4
+      },
+      {
+        "at": 0.0,
+        "scale": 1.28
+      }
+    ],
+    "breaths": []
+  },
+  "opener": {
+    "src": "intro-template/openers/<host>.mov",
+    "until": 0.0,
+    "glassIn": 0.05
+  },
+  "punches": [
+    {
+      "text": "key / *phrase*",
+      "at": 0.0,
+      "dur": 3.0
+    },
+    {
+      "text": "*6 word* / episode / title",
+      "at": 0.0,
+      "dur": 1.35,
+      "style": "center"
+    },
+    {
+      "text": "one *big* line",
+      "at": 0.0,
+      "dur": 1.5,
+      "style": "behind"
+    }
+  ],
+  "cutaways": [
+    {
+      "src": "broll-key",
+      "in": 0.0,
+      "out": 3.0,
+      "at": 0.0
+    },
+    {
+      "src": "next-graphic",
+      "in": 0.0,
+      "out": 5.0,
+      "at": 0.0,
+      "wipe": true
+    }
+  ],
+  "logo": false
+}

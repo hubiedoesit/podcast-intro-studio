@@ -1,0 +1,8 @@
+{
+  "show": "Your Show",
+  "ending": "welcome to the show",
+  "hostRole": "Host",
+  "colors": { "ink": "#15202B", "accent": "#FF6B35", "cream": "#F6EFE6", "paper": "#F7F5F2" },
+  "font": { "family": "League Gothic", "files": {} },
+  "logo": null
+}
