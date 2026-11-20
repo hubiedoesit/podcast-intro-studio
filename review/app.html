@@ -313,7 +313,12 @@
   dialog::backdrop { background: rgba(5,9,12,.7); }
   dialog h2 { margin: 0 0 12px; font: 700 30px/1 var(--display); text-transform: uppercase; }
   dialog .acts { margin-top: 14px; justify-content: flex-end; gap: 8px; }
-  dialog .acts button { padding: 6px 12px; font-size: 13px; }
+  dialog .acts { flex-wrap: wrap; }
+  /* the icon-button rule above (.acts button: 26 px wide, no fill) must not reach dialog buttons, or their labels overflow and overlap */
+  dialog .acts button { width: auto; min-height: 32px; padding: 6px 14px; font-size: 13px; white-space: nowrap; background: var(--panel-3); color: var(--text); }
+  dialog .acts button.primary { background: var(--orange); color: var(--ink); font-weight: 650; }
+  dialog .acts button.primary:hover:not(:disabled) { background: var(--orange-2); color: var(--ink); }
+  dialog ul { padding-left: 20px; overflow-wrap: anywhere; }
   .keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 4px 24px; margin: 0; }
   .keys div { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border-bottom: 1px solid var(--line); }
   .keys dt { color: var(--muted); } .keys dd { margin: 0; white-space: nowrap; }

@@ -50,8 +50,8 @@ export function lint(cfg, { root = process.cwd(), checkFiles = true } = {}) {
   if (checkFiles) {
     const seen = new Set();
     for (const s of [{ src: host.src, srcOut: r3(host.out + plan.tail), start: plan.hostStart }, ...covers, ...plan.shots.filter((x) => x.type === "hook")]) {
-      const file = cfg.sources[s.src] ?? s.src;
-      if (!fs.existsSync(file)) { if (!seen.has(file)) add("error", "sources", `Source "${s.src}" not found: ${file}`, s.start); seen.add(file); continue; }
+      const name = cfg.sources[s.src] ?? s.src, file = path.isAbsolute(name) ? name : path.resolve(root, name);
+      if (!fs.existsSync(file)) { if (!seen.has(file)) add("error", "sources", `Source "${s.src}" not found: ${name}`, s.start); seen.add(file); continue; }
       const dur = probeDuration(file);
       if (dur != null && s.srcOut > dur + 0.05) add("error", "sources", `"${s.src}" is ${fmt(dur)} long but the cut runs to ${fmt(s.srcOut)}.`, s.start);
     }
@@ -67,8 +67,8 @@ export function lint(cfg, { root = process.cwd(), checkFiles = true } = {}) {
     if (o.end <= o.start) add("error", "config", `Inset "${o.src}" has no length.`, o.start);
     if (o.onHost && (host.remove ?? []).some(([a, b]) => a < o.until && b > o.at)) add("error", "inset", `The picture-in-picture crosses a jump cut in the take, so it would fall out of sync with the voice.`, o.start, o.end);
     if (!o.onHost && checkFiles) {
-      const file = cfg.sources[o.src] ?? o.src;
-      if (!fs.existsSync(file)) add("error", "sources", `Source "${o.src}" not found: ${file}`, o.start);
+      const name = cfg.sources[o.src] ?? o.src, file = path.isAbsolute(name) ? name : path.resolve(root, name);
+      if (!fs.existsSync(file)) add("error", "sources", `Source "${o.src}" not found: ${name}`, o.start);
       else { const dur = probeDuration(file); if (dur != null && o.srcOut > dur + 0.05) add("error", "sources", `"${o.src}" is ${fmt(dur)} long but the inset runs to ${fmt(o.srcOut)}.`, o.start); }
     }
   }
